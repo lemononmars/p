@@ -64,7 +64,6 @@ function startGame(data) {
 	for (i = 0; i < data.numBots; i ++)
 		players.push(new player(players.length, 'bot#' + i, playerColors[players.length], true));
 
-	console.log(players);
 	numPlayers = players.length;
 	numBots = data.numBots;
 	gameState = 2;
@@ -136,21 +135,27 @@ function checkForInput() {
 		// each player, in tie break order, may spend 3 action cubes to buy anything in the market
 		/////////////////////////////////
 		if(phase == 0) {
-			if(myID == currentPlayer && players[myID].actionCubes >= 3) {
-				if(myGameArea.x && myGameArea.y) {
-					if (passButton.clicked()) {
-						playerAction(myID, 0, -1);
-					}
-					for (i = 0; i < 6; i ++) {
-						for (j = 0; j < shops[i].length; j ++) {
-							if (shops[i][j].clicked())
-								playerAction(myID, i, j);
+			if(myID == currentPlayer) {
+				if (players[myID].actionCubes >= 3) {
+					if(myGameArea.x && myGameArea.y) {
+						if (passButton.clicked()) {
+							playerAction(myID, 0, -1);
 						}
+						for (i = 0; i < 6; i ++) {
+							for (j = 0; j < shops[i].length; j ++) {
+								if (shops[i][j].clicked())
+									playerAction(myID, i, j);
+							}
+						}
+						myGameArea.x = false;
 					}
-					myGameArea.x = false;
 				}
-			}
-			// once everyone got a chance to buy, move on to planning phase
+				else {	// my turn but not enough action cubes >> pass
+					playerAction(myID, 0, -1);
+				}
+			} 
+			// not my turn
+			// first check if we should move on
 			else if(currentPlayer < 0) {
 				myTimeTokenButtons = [];
 				var mtt = players[myID].getMyTimeTokens();
@@ -166,13 +171,18 @@ function checkForInput() {
 				addLog("----- planning phase -----");
 				if (tutorial)
 					addLog(">> Click on two time tokens on the board to swap");
+
+				// select time tokens for bots in advance !
+				if (myID == 0)
+					for (const p in players)
+						if (players[p].isBot) 
+							botChooseTimeTokens(players[p].id);
+
 				phase = 1;
 			}
-			else {
-				if (players[currentPlayer].isBot)
-					botAction(currentPlayer);
-				else
-					playerAction(myID, 0, -1);
+			else { // otherwise, let bot takes turn
+				if (players[currentPlayer].isBot && myID == 0)
+					botAction(currentPlayer);	
 			}
 		}
 		/////////////////////////////////
@@ -180,10 +190,6 @@ function checkForInput() {
 		/////////////////////////////////
 		else if(phase == 1) {
 			if(myGameArea.x && myGameArea.y) {
-				// refresh market. for testing purpose.
-				if(statusBar.clicked()) {
-					newMarket();
-				}
 				// click on 1st time token and then 2nd one to swap them
 				for (i = 0; i < 6; i ++) {
 					if (myTimeTokenButtons[i].clicked()) {
@@ -271,7 +277,7 @@ function checkForInput() {
 					}
 					myGameArea.x = false;
 				}
-			} else if (players[currentPlayer].isBot) {
+			} else if (players[currentPlayer].isBot && myID == 0) {
 				botAction(currentPlayer);
 			}
 		}
@@ -280,18 +286,22 @@ function checkForInput() {
 		// each player may spend 2 action cubes to buy anything left in the market
 		/////////////////////////////////
 		else if(phase == 3) {
-			if(myID == currentPlayer && players[myID].actionCubes >= 2) {
-				if(myGameArea.x && myGameArea.y) {
-					if (passButton.clicked()) {
-						playerAction(myID, 0, -1);
-					}
-					for (i = 0; i < 6; i ++) {
-						for (j = 0; j < shops[i].length; j ++) {
-							if (shops[i][j].clicked())
-								playerAction(myID, i, j);
+			if(myID == currentPlayer) {
+				if (players[myID].actionCubes >= 2) {
+					if(myGameArea.x && myGameArea.y) {
+						if (passButton.clicked()) {
+							playerAction(myID, 0, -1);
 						}
+						for (i = 0; i < 6; i ++) {
+							for (j = 0; j < shops[i].length; j ++) {
+								if (shops[i][j].clicked())
+									playerAction(myID, i, j);
+							}
+						}
+						myGameArea.x = false;
 					}
-					myGameArea.x = false;
+				} else { // my turn but not enough action cubes >> pass
+					playerAction(myID, 0, -1);
 				}
 			}
 			// when everyone got a chance to buy, move on to flower arranging phase
@@ -299,6 +309,7 @@ function checkForInput() {
 				addRibbonsButton = new component(75, 25, "red", "white", 400, 265, "Add 0 8's", "center", 0);
 				submitButton = new component(60, 25, "white", "black", 480, 265, "Submit", "center");
 				passButton = new component(75, 25, "black", "white", 545, 265, "Skip phase", "center");
+
 				phase = 4;
 				selectedFlowerCard = -1;
 				selectedNumRibbons = 0;
@@ -306,12 +317,18 @@ function checkForInput() {
 				if(tutorial)
 					addLog(">> Select a flower card to arrange or skip phase");
 				statusBar.text = "Turn " + turn +": flower arranging phase";
+
+				// arrange flowers for bot in advance !
+				if (myID == 0)
+					for (const p in players)
+						if (players[p].isBot) {
+							botArrangeFlower(players[p].id);
+							socket.emit('finish arranging');
+						}
 			}
 			else {
-				if (players[currentPlayer].isBot)
+				if (players[currentPlayer].isBot && myID == 0)
 					botAction(currentPlayer);
-				else
-					playerAction(myID, 0, -1);
 			}
 		}
 		/////////////////////////////////
@@ -345,7 +362,6 @@ function checkForInput() {
 						// r = number of ribbons, 
 						if (card.verify(selectedflwTkn, players[myID].stars, r, players[myID].getBonus(0))) {
 							// hurray ! you know how to play the game !
-							players[myID].arrangeFlower(selectedFlowerCard, indices, r);
 							socket.emit('arrange flower', {
 								id : myID,
 								card : selectedFlowerCard,
@@ -365,10 +381,6 @@ function checkForInput() {
 						players[myID].vases[i].border = false;
 					for (i = 0; i < players[myID].hand.length; i ++)
 						players[myID].hand[i].border = false;
-					
-					// bot attemps to get some points
-					//for (p = 1; p < numPlayers; p ++)
-					//	botArrangeFlower(p);
 					
 					isDone = true;
 					addLog('Wait for other players to finish');
@@ -405,7 +417,18 @@ function checkForInput() {
 			}
 			if (checkEndGame()) {
 				gameState = 3;
+				var winner = 0;
+				addLog("------------- Final Scoring ---------------");
+				for (const p in players); {
+					addLog(players[p].username + ' : ' + players[p].score, players[p].color);
+					if ((players[p].score > player[winner].score) ||
+						(players[p].score == players[winner].score && tieBreak.indexOf(p) > tieBreak.indexOf(winner)))
+						winner = p;
+				}
 				statusBar.text = "Game End!";
+				addLog('', player[winner].color);
+				addLog('The winner is  ::: ' + players[winner].username + ' :::', player[winner].color);
+				addLog('', player[winner.color]);
 			}
 		}
 
@@ -515,7 +538,7 @@ function addLog(msg, id) {
 	var $log = $('<div/>').text(msg)
 		.css({"background-color" : color});
 	$('#gamelog').append($log);
-	$('#gamelog').scrollTop($('#gamelog')[0].scrollHeigth);
+	$('#gamelog').scrollTop($('#gamelog')[0].scrollHeight);
 }
 
 // return a random integer from 0 to a-1 inclusive

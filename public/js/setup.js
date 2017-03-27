@@ -27,7 +27,6 @@ function boardSetup() {
 	}
 	tieBreakTrack.push(new component(75, 25, "black", "white", 
 		25, 265, "Tie break", "center")); // add label last to make it easier to manipulate the track
-	addLog('board set up !');
 }
 
 /*
@@ -56,7 +55,6 @@ function generateGoods(num) {
     goods[4].push(getRandomFlowerCard());
 
 	goods[5] = getTools();
-	console.log(goods);
   	return goods;
   	
 }
@@ -104,5 +102,4 @@ function newMarket(goods) {
 			105 + 45 * i, 235, token.toSymbol(), "center", token));
 		// $('#shop6').after($("<button></button>").text(tools[i].toSymbol()).addClass('tool'));
 	}
-	addLog('market generated !');
 }

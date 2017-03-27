@@ -1,17 +1,25 @@
+function playerAction(id, location, index) {
+	var success = takeAction(id, location, index);
+	// see if the action works and broadcast it only when it succeeds
+	if (success) {
+		socket.emit('take action', {
+			id : id,
+			location : location,
+			index : index
+		});
+	}
+	return success;
+}
+
 ///////////////////////////////////////////////////
-//	playerAction(id, location, index)		 
+//	takeAction(id, location, index)		 
 //	A player with ID 'id' attempts to perform the 'action' at the specified 'index'
 //	id			- player ID
 //	location	- which shop the action takes place
 //	index		- which object in the location is being chosen
 ///////////////////////////////////////////////////
 
-function playerAction(id, location, index) {
-	// fast check if the player has enough money
-	if (location > 0 && location < 4 && players[id].money <= 0) {
-		addLog(">> Not enough money");
-		return false;
-	}
+function takeAction(id, location, index) {
 
 	// forced to pass if nothing is left in the shop
 	if (location > 0 && location < 6 && shops[location].length == 0)
@@ -22,13 +30,7 @@ function playerAction(id, location, index) {
         // get an action cube if you pass during buy phase
         if (phase == 2)
     		players[id].actionCubes ++;
-        if (id == myID)
-            socket.emit('take action', {
-                id : id,
-                location : 0,
-                index : -1
-            });
-        currentPlayer = nextPlayer();
+        currentPlayer = nextPlayer();	// *todo - ping next player
 		return true;
 	}
 
@@ -39,6 +41,10 @@ function playerAction(id, location, index) {
 			shops[0].splice(index, 1);
 			break;
 		case 1: case 2: case 3:
+			if (players[id].money < 1) {
+				addLog(">> Not enough money");
+				return false;
+			}
 			if (players[id].vases.length >= players[id].numVases) {
 				if (id == myID)
 					addLog(">> Your vases are full. Discard a flower token or pass.");
@@ -87,11 +93,6 @@ function playerAction(id, location, index) {
 
     if (!buyFlowerToolToken)
         currentPlayer = nextPlayer();
-    if (id == myID)
-        socket.emit('take action', {
-            id : id,
-            location : location,
-            index : index
-        });
+
 	return true;
 }

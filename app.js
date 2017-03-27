@@ -173,12 +173,11 @@ io.on('connection', function(socket){
   });
 
   socket.on('arrange flower', function(data) {
-    // send to all except sender
-    socket.broadcast.to(socket.room).emit('flower arranged', data);
+    io.in(socket.room).emit('flower arranged', data);
   })
 
-  socket.on('finish arranging', function(data) {
-    io.in(socket.room).emit('player finished arranging', data);
+  socket.on('finish arranging', function() {
+    io.in(socket.room).emit('player finished arranging');
   })
 
   socket.on('to next turn', function() {

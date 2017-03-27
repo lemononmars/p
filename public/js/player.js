@@ -120,7 +120,7 @@ function player(id, username, color, bot) {
 		this.money += this.getBonus(1);
 
 		// add log
-		addLog(this.username + " arranges a bouquet ~");
+		addLog(this.username + " arranges a bouquet ~", this.id);
 		addLog("...." + this.username + " gains $" + this.stars[this.bonus[1]], this.id);
 		addLog("...." + this.username + " gets " + s + " points", this.id);
 

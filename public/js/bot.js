@@ -2,7 +2,7 @@ function botAction(id) {
 	// early bird/after market phase
 	// *todo - do something when the bot has enough action cubes
 	if(phase == 0 || phase == 3) {
-		return true;
+		playerAction(id, 0, -1)
 	}
 	else if(phase == 2) {
 		if (shops[activeShop].length === 0) {
@@ -55,8 +55,8 @@ function botAction(id) {
 			}
 			if(!playerAction(id, activeShop, indexBest))
 				playerAction(id, activeShop, -1);
-		} //end else - some stuff in the shop
-	} //end else - phase = 2
+		}
+	}
 }
 
 function botArrangeFlower(id) {
@@ -83,8 +83,12 @@ function botArrangeFlower(id) {
 				}
 			if (total + 2*players[id].numRibbons >= requiredTotal) {
 				var numRibbonsUsed = Math.floor((requiredTotal - total)/2);
-				addLog(players[id].username + " arranges a bouquet!");
-				players[id].arrangeFlower(i, indexFTokens, numRibbonsUsed);
+				socket.emit('arrange flower', {
+					id : id,
+					card : i,
+					indices : indexFTokens,
+					ribbons : numRibbonsUsed
+				});
 			}
 		}
 
@@ -141,4 +145,10 @@ function botChooseTimeTokens(id) {
 	players[id].myPlayedTimeTokens = [];
 	for (i = 0; i < 6; i ++)
 		players[id].myPlayedTimeTokens.push(botTT[wanted.indexOf(i)]);
+
+	// send this to the server
+	socket.emit('submit time tokens', {
+		id : id,
+		timeTokens : players[id].myPlayedTimeTokens
+	});
 }

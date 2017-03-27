@@ -30,7 +30,6 @@ $(document).ready(function(){
         playerBonuses = [[0,1,2], [0,2,1], [1,0,2], [1,2,0], [2,0,1], [2,1,0]];
         for (i = 0; i < numPlayers; i ++)
             players[i].bonus = playerBonuses[data.bonuses[i]];
-        addLog('test');
     });
 
     socket.on('market generated', function(data) {
@@ -41,10 +40,7 @@ $(document).ready(function(){
         addLog(players[data.id].username + ' finished', data.id);
         players[data.id].myPlayedTimeTokens = data.timeTokens;
         numPlayersDone ++;
-        if (myID == 0 && numPlayersDone + numBots >= numPlayers) {
-             for (const p in players)
-                if (p.isBot)
-                    botChooseTimeTokens(p.id);
+        if (myID == 0 && numPlayersDone >= numPlayers) {
             socket.emit('tokens ready');
             numPlayersDone = 0;
         }
@@ -65,19 +61,16 @@ $(document).ready(function(){
     });
 
     socket.on('action taken', function(data) {
-        playerAction(data.id, data.location, data.index);
+        takeAction(data.id, data.location, data.index);
     });
 
     socket.on('flower arranged', function(data) {
         players[data.id].arrangeFlower(data.card, data.indices, data.ribbons);
     });
 
-    socket.on('player finished arranging', function(data) {
+    socket.on('player finished arranging', function() {
         numPlayersDone ++;
-        if (myID == 0 && numPlayersDone + numBots >= numPlayers) {
-            for (const p in players)
-                if (p.isBot)
-                    botArrangeFlower(p.id);
+        if (myID == 0 && numPlayersDone >= numPlayers) {
             socket.emit('to next turn');
             numPlayersDone = 0;
         }
