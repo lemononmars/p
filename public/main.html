@@ -1,0 +1,83 @@
+<html>
+	<head>
+		<title> Pakklong Talat </title>
+		<link rel="stylesheet" href="/public/style.css">
+	</head>
+	<body>
+
+<div class="pages">
+	<div id = "login_page"> 
+		<header>
+			<h1> Pakklong Talat Beta 0.1 </h1>
+		</header>
+		Username: <input type="text" id="input_username" value="First">
+		<button id ="enterlobby" onClick="enterLobby()"> Log in </button><br><br>
+
+		<a href="https://docs.google.com/document/d/1x-e-fESKsAgtAurjBV_9PIBE0R3aHYqJdpJnNpufjZg" target="_blank" >
+		Rulebook (Thai)
+		</a><br>
+		<a>How to play video</a>
+	</div>   
+	<div id ="lobby_page">
+		<div id = "menu_bar" hidden>
+			<input type = "button" id = "create_room" value = "Create Game" hidden/>
+			<span id="username" style = "color:white; right:0"></span>
+			<input type = "button" id = "log_out" value = "Log Out" style ="right:0" hidden/>
+		</div>
+
+		<div id = "gamelist_lobby" hidden>
+			<div id = "open_rooms"></div>
+				<ul class = 'rooms'></ul>
+			<div id = "online_users">
+				<p style ="text-align:center"> =Online Users= </p>
+				<ul></ul>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id = "game_board" hidden></div>
+<div id = "chat_box" hidden>
+	<div id = "chat_messages">
+		<ul></ul>
+	</div>
+	<form id = "chat_input_area" action = "">
+		<input id = "chat_input" autocomplete = "off"/> 
+		<button id = "chat_input_button" onClick = "">Send</button>
+		<button class = "chat_toggle_button">hide</button>
+		<button class = "chat_toggle_button" hidden> show </button>
+	</form>
+</div>
+
+<div id = "gamelog_window" hidden>
+	Game log :
+	<button class = "gamelog_button"> hide </button>
+	<button class = "gamelog_button" hidden> show </button><br>
+	<div id = "gamelog"></div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+<!-- server side -->
+<script src="/app.js"></script>
+
+<!-- client side-->
+<script src="/public/js/lobby_client.js"></script>
+<script src="/public/js/game_client.js"></script>
+
+<!-- main js -->
+<script src="/public/js/game.js"></script>
+
+<!-- various stuff -->
+<script src="/public/js/bot.js"></script>
+<script src="/public/js/data.js"></script>
+<script src="/public/js/game_component.js"></script>
+<script src="/public/js/player.js"></script>
+<script src="/public/js/player_action.js"></script>
+<script src="/public/js/setup.js"></script>
+
+<script>	
+
+</script>
+</body>
+</html>
