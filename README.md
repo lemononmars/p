@@ -1,4 +1,4 @@
-# Multiplayer online board game of the game I designed
+# Pak Klong Talat
 
-zzz
+Multiplayer online board game of the game I designed
 
