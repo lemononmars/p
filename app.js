@@ -19,7 +19,7 @@ var onlineUsers = {};
 var gameRooms = {};
 var activeGames = {};
 var gameRoomId = 0; // use hashtable instead of increment ?
-var playerId = 0;
+var userId = 0;
 
 // variables for game
 var playerColors = ["aquamarine", "bisque", "coral", "darkseagreen", "peru", "lightcyan"];
@@ -40,6 +40,7 @@ io.on('connection', function(socket){
     onlineUsers[username] = {};
     socket.username = username;
     socket.room = -1;
+    socket.userId = userId++;
     socket.broadcast.emit('user added', {
       username: username,
     });
@@ -195,5 +196,9 @@ io.on('connection', function(socket){
 
   socket.on('to next turn', function() {
     io.in(socket.room).emit('next turn');
+  });
+
+  socket.on('game end', function() {
+
   });
 });

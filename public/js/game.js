@@ -23,30 +23,29 @@ var tutorial = true;	// on: detailed description of each phase is displayed in l
 var isDone = false;		// check if you finish and are waiting for other players
 var numBots = 0;
 
-var statusBar;
-var shopLabels; 		// mainboard consists of shop names
+var $statusBar;
+var $shopLabels; 		// mainboard consists of shop names
 var shops; 				// list of goods components displaying in each shop
 var activeShop;			// which shop is opening now (buy phase):
 var activeTokenOrder;	// which token in the shop is taking an action
-var allPlayedTimeTokens;	// list of played time tokens on the board (buy phase)
-var myTimeTokenButtons;	// time token components displayed on the board (planning phase)
+var $allPlayedTimeTokens;	// list of played time tokens on the board (buy phase)
+var $myTimeTokenButtons;	// time token components displayed on the board (planning phase)
 var tieBreak;			// determine who buys first in case of tie
-var tieBreakTrack;		// components for buy order track
-var passButton;			// pass button used in many phases
-var submitButton;		// submit and verify your flower arrangement
-var addRibbonsButton;	// component for adding more ribbons (arranging phase) 
+var $tieBreakTrack;		// components for buy order track
+var $passButton;			// pass button used in many phases
+var $submitButton;		// submit and verify your flower arrangement
+var $addRibbonsButton;	// component for adding more ribbons (arranging phase) 
 
 var playerBoards;		// player board displays points, flower tokens, etc.
-var playLogWindow;		// component
-var playLogs;			// messages
 
+var botNames = ["Mel", "Game", "Job", "Lui", "Poupe", "Due", "Au", "Som", "Benz", "Aon", "Oak", "Boat", "Tana"];
 var playerColors = ["aquamarine", "bisque", "coral", "darkseagreen", "peru", "lightcyan"];
 var shopList = ["Restaurant", "Rose", "Orchid", "Mums", "Bookstore", "Tool"];
 var shopColors = ["yellow", "pink", "skyblue", "white", "purple", "lightgreen"];
 var shopTColors = ["black", "black", "white", "black", "white", "black"];
 var shopYCoor = [55, 85, 115, 145, 175, 235, 265];
 var timeTokenList = [0, 1, 2, 3, 4, "x", "xx"];
-var bonusSymbols = ["Q", "$", "S"];		// quality, money, score
+var bonusSymbols = ["^", "$", "+"];		// quality, money, score
 
 //////////////////////////////////////////////////////////////////////////////////////
 // add a player after username is submitted and display waiting room
@@ -61,8 +60,10 @@ function startGame(data) {
 	for (var p in data.players)
 		players.push(new player(p, data.players[p], playerColors[p], false));
 	// add highly competitive bots
-	for (i = 0; i < data.numBots; i ++)
-		players.push(new player(players.length, 'bot#' + i, playerColors[players.length], true));
+	for (i = 0; i < data.numBots; i ++) {
+		var bname = botNames[ran(botNames.length)];
+		players.push(new player(players.length, bname + '#' + i, playerColors[players.length], true));
+	}
 
 	numPlayers = players.length;
 	numBots = data.numBots;
@@ -81,6 +82,7 @@ function startGame(data) {
 		})
 	}
 
+	$('#gamelog').empty();
 	myGameArea.start();	// add the main canvas
 	boardSetup();	// add labels on the board
 	currentPlayer = tieBreak[0];
@@ -101,8 +103,10 @@ var myGameArea = {
 		this.interval = setInterval(checkForInput, 20);
 		var rect = this.canvas.getBoundingClientRect();
 		window.addEventListener("click", function(e) {
-			myGameArea.x = e.pageX - rect.left;
-			myGameArea.y = e.pageY - rect.top;
+			if (currentPlayer == myID || phase == 1 || phase == 4) {
+				myGameArea.x = e.pageX - rect.left;
+				myGameArea.y = e.pageY - rect.top;
+			}
 		});
 	},
 	clear: function() {
@@ -138,7 +142,7 @@ function checkForInput() {
 			if(myID == currentPlayer) {
 				if (players[myID].actionCubes >= 3) {
 					if(myGameArea.x && myGameArea.y) {
-						if (passButton.clicked()) {
+						if ($passButton.clicked()) {
 							playerAction(myID, 0, -1);
 						}
 						for (i = 0; i < 6; i ++) {
@@ -157,17 +161,19 @@ function checkForInput() {
 			// not my turn
 			// first check if we should move on
 			else if(currentPlayer < 0) {
-				myTimeTokenButtons = [];
+				$myTimeTokenButtons = [];
 				var mtt = players[myID].getMyTimeTokens();
 				// display time tokens on the right to choose in planning phase
 				for (i = 0; i < 6; i ++) {
-					myTimeTokenButtons.push(new component(25, 25, players[myID].color, "black", 
+					$myTimeTokenButtons.push(new component(25, 25, players[myID].color, "black", 
 					400, shopYCoor[i], timeTokenList[mtt[i]], "center", mtt[i]));
 				}
 				// submit button
-				submitButton = new component(25, 25, "black", "white", 400, shopYCoor[6], "OK", "center");
-				statusBar.text = "Turn:" + turn + ": planning phase";
+				$submitButton = new component(25, 25, "black", "white", 400, shopYCoor[6], "OK", "center");
+				$statusBar.text = "Turn:" + turn + ": planning phase";
+				addLog("*");
 				addLog("***** Turn " + turn + "******");
+				addLog("*");
 				addLog("----- planning phase -----");
 				if (tutorial)
 					addLog(">> Click on two time tokens on the board to swap");
@@ -192,32 +198,32 @@ function checkForInput() {
 			if(myGameArea.x && myGameArea.y) {
 				// click on 1st time token and then 2nd one to swap them
 				for (i = 0; i < 6; i ++) {
-					if (myTimeTokenButtons[i].clicked()) {
+					if ($myTimeTokenButtons[i].clicked()) {
 						var index = -1;
 						for (j = 0; j < 6; j ++)
-							if(myTimeTokenButtons[j].border) 
+							if($myTimeTokenButtons[j].border) 
 								index = j;
 						if (index > -1) {
-							var x = myTimeTokenButtons[index].object;
-							myTimeTokenButtons[index].object = myTimeTokenButtons[i].object;
-							myTimeTokenButtons[i].object = x;
-							myTimeTokenButtons[index].text = timeTokenList[myTimeTokenButtons[index].object];
-							myTimeTokenButtons[i].text = timeTokenList[myTimeTokenButtons[i].object];
-							myTimeTokenButtons[index].border = false;
+							var x = $myTimeTokenButtons[index].object;
+							$myTimeTokenButtons[index].object = $myTimeTokenButtons[i].object;
+							$myTimeTokenButtons[i].object = x;
+							$myTimeTokenButtons[index].text = timeTokenList[$myTimeTokenButtons[index].object];
+							$myTimeTokenButtons[i].text = timeTokenList[$myTimeTokenButtons[i].object];
+							$myTimeTokenButtons[index].border = false;
 						}
 						else
-							myTimeTokenButtons[i].toggleBorder("yellow");
+							$myTimeTokenButtons[i].toggleBorder("yellow");
 						myGameArea.x = false;
 					}
 				}
 				// submit your time tokens
-				if (!isDone && submitButton.clicked()) {
+				if (!isDone && $submitButton.clicked()) {
 					if (tutorial)
 						addLog("Done! Wait for other players");
 					for (i = 0; i < 6; i ++) {
-						players[myID].myPlayedTimeTokens[i] = myTimeTokenButtons[i].object;
+						players[myID].myPlayedTimeTokens[i] = $myTimeTokenButtons[i].object;
 					}
-					submitButton.text = "Wait";
+					$submitButton.text = "Wait";
 					isDone = true;
 					socket.emit('submit time tokens', {
 						id : myID,
@@ -236,7 +242,7 @@ function checkForInput() {
 				addLog("------ after market phase ------");
 				if (tutorial)
 					addLog(">> You may spend 2 action cubes to buy anything");
-				statusBar.text = "Turn " + turn +": after market phase";
+				$statusBar.text = "Turn " + turn +": after market phase";
 				currentPlayer = tieBreak[0];
 				phase = 3;	
 				if (myID == 0)
@@ -272,7 +278,7 @@ function checkForInput() {
 								if (shops[i][j].clicked())
 									playerAction(myID, i, j);
 					}
-					if(passButton.clicked()) {
+					if($passButton.clicked()) {
 						playerAction(myID, activeShop, -1);
 					}
 					myGameArea.x = false;
@@ -289,7 +295,7 @@ function checkForInput() {
 			if(myID == currentPlayer) {
 				if (players[myID].actionCubes >= 2) {
 					if(myGameArea.x && myGameArea.y) {
-						if (passButton.clicked()) {
+						if ($passButton.clicked()) {
 							playerAction(myID, 0, -1);
 						}
 						for (i = 0; i < 6; i ++) {
@@ -306,9 +312,9 @@ function checkForInput() {
 			}
 			// when everyone got a chance to buy, move on to flower arranging phase
 			else if (currentPlayer < 0) {
-				addRibbonsButton = new component(75, 25, "red", "white", 400, 265, "Add 0 8's", "center", 0);
-				submitButton = new component(60, 25, "white", "black", 480, 265, "Submit", "center");
-				passButton = new component(75, 25, "black", "white", 545, 265, "Skip phase", "center");
+				$addRibbonsButton = new component(75, 25, "red", "white", 400, 265, "Add 0 œ", "center", 0);
+				$submitButton = new component(60, 25, "white", "black", 480, 265, "Submit", "center");
+				$passButton = new component(75, 25, "black", "white", 545, 265, "Skip phase", "center");
 
 				phase = 4;
 				selectedFlowerCard = -1;
@@ -316,7 +322,7 @@ function checkForInput() {
 				addLog("------ arranging phase ------");
 				if(tutorial)
 					addLog(">> Select a flower card to arrange or skip phase");
-				statusBar.text = "Turn " + turn +": flower arranging phase";
+				$statusBar.text = "Turn " + turn +": flower arranging phase";
 
 				// arrange flowers for bot in advance !
 				if (myID == 0)
@@ -338,7 +344,7 @@ function checkForInput() {
 		else if(phase == 4) {
 			if(myGameArea.x && myGameArea.y) {
 				// submit selected flower card and tokens to be checked
-				if(submitButton.clicked()) {
+				if($submitButton.clicked()) {
 					if (selectedFlowerCard < 0) {
 						if (players[myID].hand.length == 0)
 							addLog("Nothing to arrange. Press -Skip Phase-");
@@ -356,7 +362,7 @@ function checkForInput() {
 								selectedflwTkn.push(players[myID].vases[i].object);
 							}
 						}
-						r = addRibbonsButton.object;
+						r = $addRibbonsButton.object;
 
 						// verify if the requirements on the card are fulfilled
 						// r = number of ribbons, 
@@ -375,7 +381,7 @@ function checkForInput() {
 					}
 				}
 				// finish and move on to the next round
-				else if(!isDone && passButton.clicked()) {
+				else if(!isDone && $passButton.clicked()) {
 					// clear borders
 					for (i = 0; i < players[myID].vases.length; i ++) 
 						players[myID].vases[i].border = false;
@@ -408,27 +414,12 @@ function checkForInput() {
 						}
 					}
 					// * to do: use drop down menu instead
-					if (addRibbonsButton.clicked()) {
-						addRibbonsButton.object = (addRibbonsButton.object+1) % (players[myID].numRibbons+1);
-						addRibbonsButton.text = "Add " + addRibbonsButton.object + " rbb";
+					if ($addRibbonsButton.clicked()) {
+						$addRibbonsButton.object = ($addRibbonsButton.object+1) % (players[myID].numRibbons+1);
+						$addRibbonsButton.text = "Add " + $addRibbonsButton.object + " œ;";
 					}
 				}
 				myGameArea.x = false;
-			}
-			if (checkEndGame()) {
-				gameState = 3;
-				var winner = 0;
-				addLog("------------- Final Scoring ---------------");
-				for (i = 0; i < numPlayers; i ++); {
-					addLog(players[i].username + ' : ' + players[i].score, players[i].color);
-					if ((players[i].score > player[winner].score) ||
-						(players[i].score == players[winner].score && tieBreak.indexOf(i) > tieBreak.indexOf(winner)))
-						winner = i;
-				}
-				statusBar.text = "Game End!";
-				addLog('', player[winner].color);
-				addLog('The winner is  ::: ' + players[winner].username + ' :::', player[winner].color);
-				addLog('', player[winner].color);
 			}
 		}
 
@@ -443,7 +434,8 @@ function checkForInput() {
 	/////////////////////////////////
 	else if (gameState == 3) {
 		if(myGameArea.x && myGameArea.y) {
-			if(statusBar.clicked()) {
+			// back to the lobby once you 
+			if($statusBar.clicked()) {
 				$('#gamelist_lobby').show();
 				$('#menu_bar').show();
 				$('#game_board').hide();
@@ -462,10 +454,10 @@ function checkForInput() {
 ///////////////////////////////////////////////////
 
 function updateBoard() {
-	statusBar.update();
+	$statusBar.update();
 
 	for (i = 0; i < 6; i ++) {
-		shopLabels[i].update();
+		$shopLabels[i].update();
 		// display goods
 		if (phase >= 1) {
 			for (j = 0; j < shops[i].length; j ++) {
@@ -479,25 +471,26 @@ function updateBoard() {
 		// display my time token buttons only in planning phase
 		if (phase == 1) 
 			for (j = 0; j < 6; j ++)
-				myTimeTokenButtons[j].update();
+				$myTimeTokenButtons[j].update();
 		// display all time tokens here
 		if (phase == 2)
-			for (const aptt of allPlayedTimeTokens[i])
+			for (const aptt of $allPlayedTimeTokens[i])
 				aptt.update();
 	}
 	
-	for (const tbt of tieBreakTrack) 
+	for (const tbt of $tieBreakTrack) 
 		tbt.update();
 	
 	if (gameState == 2) {
-	if (phase == 1 || (phase == 4 && !isDone))
-		submitButton.update();
-	if ((currentPlayer == myID && (phase == 0 || phase == 2 || phase == 3)) || (!isDone && phase == 4))
-		passButton.update();
-	if (phase == 4 && !isDone)
-		addRibbonsButton.update();
+		if (phase == 1 || (phase == 4 && !isDone))
+			$submitButton.update();
+		if ((currentPlayer == myID && (phase == 0 || phase == 2 || phase == 3)) || (!isDone && phase == 4))
+			$passButton.update();
+		if (phase == 4 && !isDone)
+			$addRibbonsButton.update();
 	}
 	players[myID].update();
+	// *todo display some info of other players
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -559,9 +552,9 @@ function shuffle(a) {
 
 // collect, sort, and create components for all player's time tokens
 function collectTimeTokens() {
-	allPlayedTimeTokens = [[],[],[],[],[],[]];
+	$allPlayedTimeTokens = [[],[],[],[],[],[]];
 
-	// sort them and create components for tokens
+	// sort them and then create components for tokens
 	for (k = 0; k < 6; k ++) {
 		var temp = [];
 		for (j = 0; j < numPlayers; j++)
@@ -571,10 +564,13 @@ function collectTimeTokens() {
 		// display each token
 		for (l = 0; l < temp.length; l++) {
 			var d = temp[l].id;
-			allPlayedTimeTokens[k].push(new component(25, 25, players[d].color,"black", 400 + 30*l, shopYCoor[k], timeTokenList[temp[l].value], "center", temp[l]));
+			$allPlayedTimeTokens[k].push(
+				new component(25, 25, players[d].color,"black", 
+				400 + 30*l, shopYCoor[k], timeTokenList[temp[l].value], "center", temp[l])
+			);
 		}
 	}
-	allPlayedTimeTokens[0][0].toggleBorder("yellow");
+	$allPlayedTimeTokens[0][0].toggleBorder("yellow");
 }
 
 // sort given time tokens
@@ -582,7 +578,8 @@ function sortTimeToken(a) {
 	for(i = 0; i < a.length; i ++) {
 		var low = i;
 		for (j = i+1; j < a.length; j ++) {
-			if(a[j].value < a[low].value || (a[j].value == a[low].value && tieBreak.indexOf(a[j].id) < tieBreak.indexOf(a[low].id))) 
+			if(a[j].value < a[low].value || 
+				(a[j].value == a[low].value && tieBreak.indexOf(a[j].id) < tieBreak.indexOf(a[low].id))) 
 				low = j;
 		}
 		x = a[i];
@@ -595,22 +592,22 @@ function sortTimeToken(a) {
 function goFirst(id) {
 	var t = tieBreak.indexOf(id);
 	tieBreak.splice(t, 1);
-	tieBreak.unshift(id);
+	tieBreak.unshift(Number(id));
 	for (k = 0; k < numPlayers; k ++) 
-		tieBreakTrack[tieBreak[k]].moveTo(105 + 30*k, tieBreakTrack[0].y);
+		$tieBreakTrack[tieBreak[k]].moveTo(105 + 30*k, $tieBreakTrack[0].y);
 }
 
 function nextPlayer () {
 	// during phase 2, the next player is determined by time token
 	if (phase == 2) {
-		allPlayedTimeTokens[activeShop][activeTokenOrder].border = false;
+		$allPlayedTimeTokens[activeShop][activeTokenOrder].border = false;
 		activeTokenOrder++;
 		if (activeTokenOrder >= numPlayers) {
 			activeShop++;
 			activeTokenOrder = 0;
 		}
 		if (activeShop < 6) {
-			allPlayedTimeTokens[activeShop][activeTokenOrder].toggleBorder("yellow");
+			$allPlayedTimeTokens[activeShop][activeTokenOrder].toggleBorder("yellow");
 			return getActiveTimeToken().id;
 		}
 	}
@@ -626,7 +623,7 @@ function nextPlayer () {
 }
 
 function getActiveTimeToken() {
-	return allPlayedTimeTokens[activeShop][activeTokenOrder].object;
+	return $allPlayedTimeTokens[activeShop][activeTokenOrder].object;
 }
 
 // game end when one of the following conditions is met
@@ -634,26 +631,30 @@ function getActiveTimeToken() {
 // 2. some player gets at least 8 stars in one color
 // 3. some player gets at least 50 points
 function checkEndGame() {
-	var end = false;
-	if (turn >= 10)
+	var turnThreshold = 10,
+	scoreThreshold = 40,
+	starThreshold = 7,
+	end = false;
+
+	if (turn >= turnThreshold)
 		return true;
 	
 	var maxScore = 0;
 	for (const p in players) {
 		var maxStars = 0;
-		for (const s in p.stars) {
-			if (s > maxStars)
-				maxStars = s;
+		for (const s in players[p].stars) {
+			if (players[p].stars[s] > maxStars)
+				maxStars = players[p].stars[s];
 		}
-		if (maxStars >= 8) {
+		if (maxStars >= starThreshold) {
 			end = true;
-			p.score += 2;	// extra points for reaching the threshold
+			players[p].score += 2;	// extra points for reaching the threshold
 		}
-		if (p.score > maxScore)
-			maxScore = p.score;
+		if (players[p].score > maxScore)
+			maxScore = players[p].score;
 	}
 	
-	if (maxScore >= 30)
+	if (maxScore >= scoreThreshold)
 		end = true;
 	return end;
 }

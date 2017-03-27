@@ -68,9 +68,13 @@ function botArrangeFlower(id) {
 		var requiredTotal = players[id].hand[i].object.quality;
 		var flowers = [[],[],[]];
 		for (j = 0; j < players[id].vases.length; j ++)
-			flowers[players[id].vases[j].object.type].push([j, players[id].vases[j].object.quality]); // push (index of the token in the vase, quality of that token)
+			flowers[players[id].vases[j].object.type].push(
+				[j, players[id].vases[j].object.quality]
+			); // push (index of the token in the vase, quality of that token)
 		
- 		if (flowers[0].length >= requiredFlowers[0] && flowers[1].length >= requiredFlowers[1] && flowers[2].length >= requiredFlowers[2]) {
+ 		if (flowers[0].length >= requiredFlowers[0] && 
+			flowers[1].length >= requiredFlowers[1] && 
+			flowers[2].length >= requiredFlowers[2]) {
 			for (k = 0; k < flowers.length; k ++)
 				flowers[k].sort(function(a,b){return a[1]-b[1];});
 
@@ -89,6 +93,7 @@ function botArrangeFlower(id) {
 					indices : indexFTokens,
 					ribbons : numRibbonsUsed
 				});
+				return true;
 			}
 		}
 

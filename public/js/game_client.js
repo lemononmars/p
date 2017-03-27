@@ -21,6 +21,7 @@ $(document).ready(function(){
 
     // handing out stuff you start the game with
     socket.on('starting stuff recieved', function(data) {
+        // starting flower card (easy one)
         for (i = 0; i < numPlayers; i ++) {
             var a = data.flowerCards[myID];
             var card = new flowerCard(a[0], a[1], a[2], a[3], a[4]);
@@ -37,7 +38,7 @@ $(document).ready(function(){
     });
 
     socket.on('time tokens submitted', function(data) {
-        addLog(players[data.id].username + ' finished', data.id);
+        addLog(players[data.id].username + ' has submittedd time tokens', data.id);
         players[data.id].myPlayedTimeTokens = data.timeTokens;
         numPlayersDone ++;
         if (myID == 0 && numPlayersDone >= numPlayers) {
@@ -50,8 +51,8 @@ $(document).ready(function(){
         isDone = false;
         collectTimeTokens();	// wait for this message from the server
         phase = 2;
-        statusBar.text = "Turn " + turn + ": buy phase";
-        passButton = new component(50, 25, "black", "white", 400, 265, "Pass", "center");
+        $statusBar.text = "Turn " + turn + ": buy phase";
+        $passButton = new component(50, 25, "black", "white", 400, 265, "Pass", "center");
         activeShop = 0;
         activeTokenOrder = 0;
         currentPlayer = getActiveTimeToken().id;
@@ -78,9 +79,29 @@ $(document).ready(function(){
 
     socket.on('next turn', function() {
         isDone = false;
-        turn ++;
-        phase = 0;
-        if (myID == 0)
-            socket.emit('generate market', generateGoods(numPlayers));
+        if (checkEndGame()) {
+            gameState = 3;
+            var winner = 0;
+            addLog("------------- ------------- ------------- ");
+            addLog("------------- Final Scoring ---------");
+            addLog("------------- ------------- ------------- ");
+            for (k = 0; k < numPlayers; k ++) {
+                addLog(players[k].username + ' : ' + players[k].score, k);
+                if ((players[k].score > players[winner].score) ||
+                    (players[k].score == players[winner].score && tieBreak.indexOf(k) > tieBreak.indexOf(winner)))
+                    winner = k;
+            }
+            $statusBar.text = "Game End! Click here to return to lobby";
+            addLog('||', winner);
+            addLog('||  The winner is  ::: ' + players[winner].username + ' :::', winner);
+            addLog('||', winner);
+            if (myID == 0)
+                socket.emit('game end');
+		} else {
+            turn ++;
+            phase = 0;
+            if (myID == 0)
+                socket.emit('generate market', generateGoods(numPlayers));
+        }
     });
 });

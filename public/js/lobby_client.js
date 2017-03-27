@@ -72,6 +72,7 @@ $(document).ready(function(){
             .text(data.host));
 
         if (data.host === myusername) {
+            myroom = data.roomId;
             var $deleteButton = $('<button/>')
                 .text('Delete')
                 .addClass('delete_room')

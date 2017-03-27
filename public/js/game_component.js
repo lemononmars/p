@@ -66,13 +66,13 @@ function toolToken(type, cost) {
 	this.toSymbol = function() {
 		var text = "";
 		switch(type) {
-			case 0: text = "C"; break;		// clock
-			case 1: text = "CC"; break;	// two clocks
-			case 2: text = "V"; break;		// vase
-			case 3: text = "R"; break;		// ribbon
-			case 4: text = "RR"; break;	// two ribbons
-			case 5: text = "F"; break;		// buy flower
-			case 6: text = "T";			// first buy order
+			case 0: text = "Ø"; break;		// clock
+			case 1: text = "ØØ"; break;	// two clocks
+			case 2: text = "Ÿ"; break;		// vase
+			case 3: text = "œ"; break;		// ribbon
+			case 4: text = "œœ"; break;	// two ribbons
+			case 5: text = "*"; break;		// buy a leftover flower
+			case 6: text = "«";			// first buy order
 		}
 		return text + ":" + this.cost;
 	};
@@ -83,7 +83,7 @@ function toolToken(type, cost) {
 			case 2: return "a Vase.";
 			case 3: return "a Ribbon.";
 			case 4: return "two Ribbons.";
-			case 5: return "* buy a flower.";
+			case 5: return "a leftover flower.";
 			case 6: return "1st in tie break";
 			default: return "what?";
 		}

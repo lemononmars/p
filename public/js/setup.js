@@ -1,18 +1,18 @@
 // set up the board by adding labels and player boards
 function boardSetup() {
-	statusBar = new component(400, 25, "lightgray", "black", 25, 25, "", "center", "text");
-	passButton = new component(50, 25, "black", "white", 400, 265, "Pass", "center");
+	$statusBar = new component(400, 25, "lightgray", "black", 25, 25, "", "center", "text");
+	$passButton = new component(50, 25, "black", "white", 400, 265, "Pass", "center");
 
-	shopLabels = [];
+	$shopLabels = [];
 
 	// add the shops
 	for (i = 0; i < 6; i ++) {
-		shopLabels.push(new component(75, 25, shopColors[i], shopTColors[i], 25, shopYCoor[i], shopList[i], "center"));
+		$shopLabels.push(new component(75, 25, shopColors[i], shopTColors[i], 25, shopYCoor[i], shopList[i], "center"));
 	}
 
 	// add buy order track and determine buy order randomly
 	// buyOrder[0] contains player's id who wins all ties (leftmost on the trak)
-	tieBreakTrack = [];
+	$tieBreakTrack = [];
 	tieBreak = [];
 	for (i = 0; i < numPlayers; i ++) 
 		tieBreak.push(i);
@@ -20,12 +20,12 @@ function boardSetup() {
 	// add tie break track
 	for (i = 0; i < numPlayers; i ++) {
 		var c = tieBreak[i];
-		tieBreakTrack.push(new component(25, 25, playerColors[i], "white", 105 + 30*c, 265, "", "left"));
+		$tieBreakTrack.push(new component(25, 25, playerColors[i], "white", 105 + 30*c, 265, "", "left"));
 		// distribute starting resources depending on tie break order
 		players[c].money += startingMoney + Math.floor(i/2);
 		players[c].numRibbons += i%2;
 	}
-	tieBreakTrack.push(new component(75, 25, "black", "white", 
+	$tieBreakTrack.push(new component(75, 25, "black", "white", 
 		25, 265, "Tie break", "center")); // add label last to make it easier to manipulate the track
 }
 

@@ -144,7 +144,7 @@ function player(id, username, color, bot) {
 		ctx.textAlign = "left";
 		ctx.fillText("Score:" + this.score, 			80, y);
 		ctx.fillText("$" + this.money, 					150, y);
-		ctx.fillText("|><| " + this.numRibbons,			190, y);
+		ctx.fillText("œ " + this.numRibbons,			190, y);
 		// add stars and corresponding bonus symbols
 		for (j = 0; j < 3; j ++) {
 			ctx.fillStyle = shopColors[j+1];
@@ -154,10 +154,10 @@ function player(id, username, color, bot) {
 			ctx.fillText(this.stars[j], 						320 + 40*j, y);
 		}
 		// add cards
-		ctx.fillText("O: " + this.getTimeTokensString(),			80, y + 18);
+		ctx.fillText("Ø: " + this.getTimeTokensString(),			80, y + 18);
 		ctx.fillText(this.username,									30, y + 20);
 		ctx.fillText("#Bouquets: " + this.numPlayedCards,			300,y + 20);
-		ctx.fillText("V",											80, y + 40);
+		ctx.fillText("Ÿ",											80, y + 40);
 		ctx.fillText("Action cubes: " + this.actionCubes,			300,y + 40);
 		for (j = 0; j < this.vases.length; j ++)
 			this.vases[j].update();
