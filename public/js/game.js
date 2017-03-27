@@ -419,16 +419,16 @@ function checkForInput() {
 				gameState = 3;
 				var winner = 0;
 				addLog("------------- Final Scoring ---------------");
-				for (const p in players); {
-					addLog(players[p].username + ' : ' + players[p].score, players[p].color);
-					if ((players[p].score > player[winner].score) ||
-						(players[p].score == players[winner].score && tieBreak.indexOf(p) > tieBreak.indexOf(winner)))
-						winner = p;
+				for (i = 0; i < numPlayers; i ++); {
+					addLog(players[i].username + ' : ' + players[i].score, players[i].color);
+					if ((players[i].score > player[winner].score) ||
+						(players[i].score == players[winner].score && tieBreak.indexOf(i) > tieBreak.indexOf(winner)))
+						winner = i;
 				}
 				statusBar.text = "Game End!";
 				addLog('', player[winner].color);
 				addLog('The winner is  ::: ' + players[winner].username + ' :::', player[winner].color);
-				addLog('', player[winner.color]);
+				addLog('', player[winner].color);
 			}
 		}
 

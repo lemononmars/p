@@ -19,6 +19,7 @@ var onlineUsers = {};
 var gameRooms = {};
 var activeGames = {};
 var gameRoomId = 0; // use hashtable instead of increment ?
+var playerId = 0;
 
 // variables for game
 var playerColors = ["aquamarine", "bisque", "coral", "darkseagreen", "peru", "lightcyan"];
@@ -39,9 +40,20 @@ io.on('connection', function(socket){
     onlineUsers[username] = {};
     socket.username = username;
     socket.room = -1;
-    io.emit('user added', {
-      username: username
+    socket.broadcast.emit('user added', {
+      username: username,
     });
+
+    for (p in onlineUsers)
+      socket.emit('user added', {
+        username: p
+      });
+    for (r in gameRooms) {
+      socket.emit('room created', {
+        roomId : r,
+        host: Object.keys(gameRooms[r])[0]
+      })
+    }
   });
 
   // disconnect a user
@@ -49,7 +61,7 @@ io.on('connection', function(socket){
     if (addedUser) {
       delete onlineUsers[socket.username];
       io.emit('user disconnected', {
-        username: socket.username
+        username: socket.username,
       });
     }
   });
@@ -116,6 +128,7 @@ io.on('connection', function(socket){
     var numBots = Number(data.numBots);
     var numPlayers = Object.keys(gameRooms[socket.room]).length;
     console.log(numBots + numPlayers);
+    // the game hosts 2-6 players
     if (numPlayers + numBots > 1 && numPlayers + numBots < 7) {
       console.log('game #' + socket.room + ' starts !!!');
 
@@ -137,7 +150,7 @@ io.on('connection', function(socket){
       });
     }
     else{
-      socket.emit('error', {
+      socket.emit('errorMessage', {
         errorText : numPlayers + numBots > 1 ? "Not enough players" : "Too many playesr"
       });
     }

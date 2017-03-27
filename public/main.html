@@ -20,9 +20,9 @@
 	</div>   
 	<div id ="lobby_page">
 		<div id = "menu_bar" hidden>
-			<input type = "button" id = "create_room" value = "Create Game" hidden/>
-			<span id="username" style = "color:white; right:0"></span>
-			<input type = "button" id = "log_out" value = "Log Out" style ="right:0" hidden/>
+			<input type = "button" id = "create_room" value = "Create Game"/>
+			<input type = "button" id = "log_out" value = "Log Out" style ="float:right"/>
+			<span id="username" style = "margin-left: 20px; color:white; float:right"></span>
 		</div>
 
 		<div id = "gamelist_lobby" hidden>
@@ -41,12 +41,14 @@
 	<div id = "chat_messages">
 		<ul></ul>
 	</div>
-	<form id = "chat_input_area" action = "">
-		<input id = "chat_input" autocomplete = "off"/> 
-		<button id = "chat_input_button" onClick = "">Send</button>
-		<button class = "chat_toggle_button">hide</button>
-		<button class = "chat_toggle_button" hidden> show </button>
-	</form>
+	<div id = "chat_input_area">
+		<form action="javascript:void(0)">
+			<input id = "chat_input" autocomplete = "off"/> 
+			<button id = "chat_input_button" onClick = "">Send</button>
+			<button class = "chat_toggle_button" style = "float:right">hide</button>
+			<button class = "chat_toggle_button" style = "float:right" hidden> show </button>
+		</form>
+	</div>
 </div>
 
 <div id = "gamelog_window" hidden>

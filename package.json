@@ -1,7 +1,7 @@
 {
-  "name": "socket-chat-example",
+  "name": "pakklong talat online",
   "version": "0.0.1",
-  "description": "my first socket.io app",
+  "description": "my first board game app",
   "dependencies": {
     "express": "^4.15.2",
     "socket.io": "^1.7.3"

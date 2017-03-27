@@ -43,8 +43,8 @@ $(document).ready(function(){
         socket.emit('start game', {numBots : numBots});
     });
 
-    $(document).on('click', '.log_out', function() {
-        socket.emit('log out');
+    $(document).on('click', '#log_out', function() {
+        logOut();
     });
 
     /**
@@ -53,13 +53,14 @@ $(document).ready(function(){
 
     // add a newly logged in user
     socket.on('user added', function(data) {
-        $('#online_users ul').append($('<li/>').text(data.username));
+        $('#online_users ul').append(
+            $('<li/>').text(data.username)
+        );
     });
 
     // remove a user who just disconnected
     socket.on('user disconnected', function(data) {
-        console.log('trying to remove a disconnected user');
-        $('#online_users ul li').filter(function(){return this.text ===  data.username;}).remove();
+        $('#online_users ul li').filter(function(){return this.text() ===  data.username;}).remove();
     });
 
     // create a new room
@@ -82,7 +83,9 @@ $(document).ready(function(){
             var $addBots = $('<select/>').attr('id', 'add_bots');
 
             for (i = 0; i < 6; i ++)
-                $addBots.append($('<option/>').val(i).text(i));
+                $addBots.append(
+                    $('<option/>').val(i).text(i)
+                );
 
             $buttonArea.append($deleteButton)
                 .append($startButton)
@@ -136,16 +139,15 @@ $(document).ready(function(){
             .remove();
     });
 
-    socket.on('error', function(data) {
+    socket.on('errorMessage', function(data) {
         alert(data.errorText);
     });
 });
 
+// log in page > lobby
 function enterLobby() {
     $('#login_page').hide();
     $('#menu_bar').show();
-    $('#create_room').show();
-    $('#log_out').show();
     $('#gamelist_lobby').show();
     $('#chat_box').show();
 
@@ -155,3 +157,10 @@ function enterLobby() {
     socket.emit('add user', {username: myusername});
 }
 
+// lobby > log in page
+function logOut() {
+    $('#login_page').show();
+    $('#menu_bar').hide();
+    $('#gamelist_lobby').hide();
+    $('#chat_box').hide();
+}
