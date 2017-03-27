@@ -2,17 +2,16 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var port = process.env.PORT || 3000;
 
-// note: remove this when uploading to the server
-app.use(express.static(__dirname));
+app.use(express.static('public'));
 
-// note: remove __dirname when uploading to the server
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/public/main.html');
 });
 
-http.listen(3000, function(){
-  console.log('listening on *:3000');
+http.listen(port, function(){
+  console.log('listening on *:' + port);
 });
 
 // variables for gamelist lobby
