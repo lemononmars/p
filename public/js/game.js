@@ -366,7 +366,7 @@ function checkForInput() {
 
 						// verify if the requirements on the card are fulfilled
 						// r = number of ribbons, 
-						if (card.verify(selectedflwTkn, players[myID].stars, r, players[myID].getBonus(0))) {
+						if (card.verify(selectedflwTkn, r, players[myID].getBonus(0))) {
 							// hurray ! you know how to play the game !
 							socket.emit('arrange flower', {
 								id : myID,
