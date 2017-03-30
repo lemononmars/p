@@ -1,4 +1,33 @@
-// set up the board by adding labels and player boards
+/*
+*		generate and add main canvas to html	 
+*/
+
+var myGameArea = {
+	canvas: document.createElement("canvas"),
+	start: function() {
+		this.canvas.width = 700;
+		this.canvas.height = 600;
+		this.canvas.border = "5px";
+		this.context = this.canvas.getContext("2d");
+		$("#game_board").append(this.canvas);
+		this.interval = setInterval(checkForInput, 20);
+		var rect = this.canvas.getBoundingClientRect();
+		window.addEventListener("click", function(e) {
+			if (currentPlayer == myID || phase == 1 || phase == 4) {
+				myGameArea.x = e.pageX - rect.left;
+				myGameArea.y = e.pageY - rect.top;
+			}
+		});
+	},
+	clear: function() {
+		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	}
+};
+
+/*
+* set up the board by adding labels and player boards
+*/
+
 function boardSetup() {
 	$statusBar = new component(400, 25, "lightgray", "black", 25, 25, "", "center", "text");
 	$passButton = new component(50, 25, "black", "white", 400, 265, "Pass", "center");
@@ -13,9 +42,6 @@ function boardSetup() {
 	// add buy order track and determine buy order randomly
 	// buyOrder[0] contains player's id who wins all ties (leftmost on the trak)
 	$tieBreakTrack = [];
-	tieBreak = [];
-	for (i = 0; i < numPlayers; i ++) 
-		tieBreak.push(i);
 
 	// add tie break track
 	for (i = 0; i < numPlayers; i ++) {
@@ -51,8 +77,9 @@ function generateGoods(num) {
 		goods[shopIndex].push(flowerTokens[i]);
 	}
 
-	for (i = 0; i < num; i ++)
-    goods[4].push(getRandomFlowerCard());
+	for (i = 0; i < num; i ++) {
+		goods[4].push(getRandomFlowerCard());
+	}
 
 	goods[5] = getTools();
   	return goods;
@@ -76,6 +103,7 @@ function newMarket(goods) {
 		// $('#shop1').after($("<button></button>").text("$" + money).addClass("money"));
 	}
 
+	// Shop #2-4 : flower shops. Players buy flowers here.
 	for (j = 1; j < 4; j ++)
 		for (i = 0; i < goods[j].length; i++) {
 			var token = new flowerToken(goods[j][i][0], goods[j][i][1]);

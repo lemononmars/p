@@ -1,0 +1,110 @@
+<html>
+	<head>
+		<title> Pakklong Talat </title>
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<div class="main_content">
+			<div class="pages">
+				<div id = "login_page">
+					<table class="login_page_table">
+						<tbody>
+							<tr>
+								<td>
+									<header>
+										<h1> Pakklong Talat Beta 0.1 </h1>
+									</header>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<table class="login_form">
+										<tbody>
+											<tr>
+												<td class="username">
+													Username: 
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<input type="text" id="input_username" value="First"><button id ="enterlobby" onClick="enterLobby()"> Log in </button>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<br>
+									<br>
+									<a href="https://docs.google.com/document/d/1dQ1mH9Ry-FS9j9AFXasD_7qkcrT0Qf7DXJvNI4rI4K4/" target="_blank" >
+									Rulebook (Thai)
+									</a>
+									<br>
+									<a>How to play video</a>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>   
+				<div id ="lobby_page">
+					<div id = "menu_bar" hidden>
+						<input type = "button" id = "create_room" value = "Create Game"/>
+						<input type = "button" id = "log_out" value = "Log Out" style ="float:right"/>
+						<span id="username" style = "margin-left: 20px; color:white; float:right"></span>
+					</div>
+					<div id = "gamelist_lobby" hidden>
+						<div id = "open_rooms"></div>
+							<ul class = 'rooms'></ul>
+						<div id = "online_users">
+							<p style ="text-align:center"> =Online Users= </p>
+							<ul></ul>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div id = "game_board" hidden></div>
+			<div id = "chat_box" class="chat_box" hidden>
+				<div id = "chat_messages">
+					<ul></ul>
+				</div>
+				<div id = "chat_input_area" class="chat_input_area">
+					<form action="javascript:void(0)" class="chat_form">
+						<input id = "chat_input" class="chat_input" autocomplete = "off"/> 
+						<button id = "chat_input_button" onClick = "">Send</button>
+						<button class = "chat_toggle_button" style = "float:right">hide</button>
+						<button class = "chat_toggle_button" style = "float:right" hidden> show </button>
+					</form>
+				</div>
+			</div>
+
+			<div id = "gamelog_window" hidden>
+				Game log :
+				<button class = "gamelog_button"> hide </button>
+				<button class = "gamelog_button" hidden> show </button><br>
+				<div id = "gamelog"></div>
+			</div>
+		</div>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+		<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+		<!-- server side -->
+
+
+		<!-- client side-->
+		<script src="js/lobby_client.js"></script>
+		<script src="js/game_client.js"></script>
+
+		<!-- main js -->
+		<script src="js/game.js"></script>
+
+		<!-- various stuff -->
+		<script src="js/bot.js"></script>
+		<script src="js/data.js"></script>
+		<script src="js/game_component.js"></script>
+		<script src="js/player.js"></script>
+		<script src="js/player_action.js"></script>
+		<script src="js/setup.js"></script>
+	</body>
+</html>

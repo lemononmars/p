@@ -12,7 +12,7 @@ function player(id, username, color, bot) {
 	this.myPlayedTimeTokens = [];	// played time tokens (planning phase)
 	this.stars = new Array(0,0,0); 	// number of flowers you've arranged (called experience)
 	this.bonus = new Array(0,0,0);	// stars of type bonus[i] give bonus i   
-	// bonus: 0 = qual, 1 = money, 2 = score
+									// bonus: 0 = qual, 1 = money, 2 = score
 	this.hand = []; 				// component of flower cards in hand not yet arranged
 	this.numPlayedCards = 0;		// number of flower cards played
 	this.numRibbons = 0;
@@ -26,15 +26,15 @@ function player(id, username, color, bot) {
 	};
 
 	// discard a card and reindex components
-    // *todo - confirm discard
 	this.discardFlowerCard = function(index) {
 		if (index >=0 && index < this.hand.length) {
 			if (phase != 4)
 				addLog(this.username + " discards a card", this.id);
 			this.hand.splice(index, 1);
 			for (i = index; i < this.hand.length; i ++) {
-				this.hand[i].moveTo(425 + 45*i, 300 + this.id*65) ;
-				this.hand[i].update();
+				this.hand[i].moveTo(425 + 45*i, 300) ;
+				if (myID == this.id)
+					this.hand[i].update();
 			}
 			return true;
 		}
@@ -50,15 +50,15 @@ function player(id, username, color, bot) {
 	};
 
 	// discard a flower token and reindex components
-    // *todo - confirm discard
 	this.discardFlowerToken = function(index) {
 		if (index >=0 && index < this.vases.length) {
 			if (phase != 4)
 				addLog(this.username + " discards a " + shopList[this.vases[index].object.type + 1], this.id);
 			this.vases.splice(index, 1);
 			for (i = index; i < this.vases.length; i ++) {
-				this.vases[i].moveTo(100 + 25*i, 335 + this.id*65);
-				this.vases[i].update();
+				this.vases[i].moveTo(100 + 25*i, 335);
+				if (myID == this.id)
+					this.vases[i].update();
 			}
 			return true;
 		}
@@ -77,7 +77,7 @@ function player(id, username, color, bot) {
 			case 3: this.numRibbons += 1;	break;
 			case 4: this.numRibbons += 2;	break;
 			case 5: buyFlowerToolToken = true; 
-				addLog(this.username + " may buy any leftover flower", this.id);
+				addLog(">> You may buy any leftover flower");
 				break;	
 			case 6: goFirst(this.id); break;
 			default:
@@ -98,7 +98,7 @@ function player(id, username, color, bot) {
 			if (i != this.time)
 				str = str + "( " + timeTokenList[i] + " )";
 			else
-				str = str + "( ? )";
+				str = str + "( * )";
 		return str;
 	};
 

@@ -1,7 +1,8 @@
 var players; 		// list of players
 var numPlayers;
-var gameState;		//	0 = start screen, 1 = waiting for players, 2 = playing, 3 = game end
-var turn;			// number of turns passed, starting at 0
+var numBots = 0;
+var gameState;		//	1 = loading screen, 2 = playing, 3 = game end
+var turn;			// number of turns passed, starting at 1
 var phase;
 /* phase: each round consists of 4 phases
 	0. early bird phase	- each player can spend 3 action cubes to buy anything in the market
@@ -12,8 +13,8 @@ var phase;
 */
 var buyFlowerToolToken = false;	// boolean for tool token that allows you to buy leftover flower
 
-var currentPlayer;	// who is playing
-var myusername;
+var currentPlayer;		// who is playing
+var myusername;			
 var myID;
 var gameID;
 var selectedFlowerCard;	// card currently selected (arranging phase)
@@ -21,10 +22,9 @@ var startingMoney = 5;
 var handLimit = 4;
 var tutorial = true;	// on: detailed description of each phase is displayed in log
 var isDone = false;		// check if you finish and are waiting for other players
-var numBots = 0;
 
-var $statusBar;
-var $shopLabels; 		// mainboard consists of shop names
+var $statusBar;			// grey bar at the top, showing current turn & phase
+var $shopLabels; 		// mainboard consisting of shop names
 var shops; 				// list of goods components displaying in each shop
 var activeShop;			// which shop is opening now (buy phase):
 var activeTokenOrder;	// which token in the shop is taking an action
@@ -76,9 +76,15 @@ function startGame(data) {
 		socket.emit('generate market', generateGoods(numPlayers));
 		var bonus = [0,1,2,3,4,5];
       	shuffle(bonus);
+		tieBreak = [];
+		for (i = 0; i < numPlayers; i ++) 
+			tieBreak.push(i);
+		shuffle(tieBreak);
+
 		socket.emit('give starting stuff', {
 			flowerCards : generateStartingFlowerCards(),
-			bonuses : bonus
+			bonuses : bonus,
+			tieBreak: tieBreak
 		})
 	}
 
@@ -87,32 +93,6 @@ function startGame(data) {
 	boardSetup();	// add labels on the board
 	currentPlayer = tieBreak[0];
 }
-
-///////////////////////////////////////////////////
-//		generate and add main canvas to html	 //
-///////////////////////////////////////////////////
-
-var myGameArea = {
-	canvas: document.createElement("canvas"),
-	start: function() {
-		this.canvas.width = 800;
-		this.canvas.height = 800;
-		this.canvas.border = "5px";
-		this.context = this.canvas.getContext("2d");
-		$("#game_board").append(this.canvas);
-		this.interval = setInterval(checkForInput, 20);
-		var rect = this.canvas.getBoundingClientRect();
-		window.addEventListener("click", function(e) {
-			if (currentPlayer == myID || phase == 1 || phase == 4) {
-				myGameArea.x = e.pageX - rect.left;
-				myGameArea.y = e.pageY - rect.top;
-			}
-		});
-	},
-	clear: function() {
-		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-	}
-};
 
 /////////////////////////////////////////////////////////////////////////
 //
@@ -130,6 +110,7 @@ function checkForInput() {
 	if (gameState == 1) {
 		// perpetually rolling ball
 	}
+
 	/////////////////////////////////
 	// Game State 2: main game screen
 	/////////////////////////////////
@@ -237,19 +218,8 @@ function checkForInput() {
 		// Phase 2: buy phase
 		/////////////////////////////////
 		else if(phase == 2) {
-			// all time tokens got resolved. move on to phase 3
-			if(activeShop >= 6) {
-				addLog("------ after market phase ------");
-				if (tutorial)
-					addLog(">> You may spend 2 action cubes to buy anything");
-				$statusBar.text = "Turn " + turn +": after market phase";
-				currentPlayer = tieBreak[0];
-				phase = 3;	
-				if (myID == 0)
-					socket.emit('after market phase');
-			}	
 			// x and xx don't give players an action
-			else if(getActiveTimeToken().value >= 5) {
+			if(getActiveTimeToken().value >= 5) {
 				currentPlayer = nextPlayer();
 			}
 			else if(currentPlayer == myID) {
@@ -264,12 +234,15 @@ function checkForInput() {
 					// you can discard any flower tokens and cards during your turn
 					// will add confirm button later. for the time being, please don't accidentally click on them
 					for (i = 0; i < players[myID].vases.length; i ++) {
-						if (players[myID].vases[i].clicked())
-							players[myID].discardFlowerToken(i);
+						if (players[myID].vases[i].clicked()) {
+							if (window.confirm("Discard the flower token ?"))
+								players[myID].discardFlowerToken(i);
+						}
 					}
 					for (i = 0; i < players[myID].hand.length; i ++) {
 						if (players[myID].hand[i].clicked())
-							players[myID].discardFlowerCard(i);
+							if (window.confirm("Discard the card ?"))
+								players[myID].discardFlowerCard(i);
 					}
 					// special phase when you choose the tool that lets you buy any leftover flower
 					if (buyFlowerToolToken) {
@@ -320,8 +293,10 @@ function checkForInput() {
 				selectedFlowerCard = -1;
 				selectedNumRibbons = 0;
 				addLog("------ arranging phase ------");
-				if(tutorial)
-					addLog(">> Select a flower card to arrange or skip phase");
+				if(tutorial) {
+					addLog(">> Select a flower card & flower tokens to arrange");
+					addLog(">> or skip phase")
+				}
 				$statusBar.text = "Turn " + turn +": flower arranging phase";
 
 				// arrange flowers for bot in advance !
@@ -416,7 +391,7 @@ function checkForInput() {
 					// * to do: use drop down menu instead
 					if ($addRibbonsButton.clicked()) {
 						$addRibbonsButton.object = ($addRibbonsButton.object+1) % (players[myID].numRibbons+1);
-						$addRibbonsButton.text = "Add " + $addRibbonsButton.object + " œ;";
+						$addRibbonsButton.text = "Add " + $addRibbonsButton.object + " œ";
 					}
 				}
 				myGameArea.x = false;
@@ -590,7 +565,7 @@ function sortTimeToken(a) {
 
 // move player id to the first (leftmost) in tie break track
 function goFirst(id) {
-	var t = tieBreak.indexOf(id);
+	var t = tieBreak.indexOf(Number(id));
 	tieBreak.splice(t, 1);
 	tieBreak.unshift(Number(id));
 	for (k = 0; k < numPlayers; k ++) 
@@ -606,9 +581,14 @@ function nextPlayer () {
 			activeShop++;
 			activeTokenOrder = 0;
 		}
+
 		if (activeShop < 6) {
 			$allPlayedTimeTokens[activeShop][activeTokenOrder].toggleBorder("yellow");
 			return getActiveTimeToken().id;
+		}
+		else if (myID == 0) {
+			socket.emit('end buy phase');
+			return -1;
 		}
 	}
 	// during phase 0 and 3, the next player is determined by tie break order
@@ -619,7 +599,6 @@ function nextPlayer () {
 		else
 			return -1;
 	}
-
 }
 
 function getActiveTimeToken() {

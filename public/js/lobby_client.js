@@ -21,16 +21,22 @@ $(document).ready(function(){
     });
 
     $(document).on('click', '.delete_room', function() {
-        socket.emit('delete room', {roomId: $(this).val()});
+        socket.emit('delete room', {
+            roomId: $(this).val()
+        });
     });
 
     $(document).on('click', '.join_leave_room', function() {
         var id = $(this).val();
+        console.log(id, myroom);
         if (myroom == -1) {
             $(this).text("Leave");
-            socket.emit('join room', {roomId: id});
+            socket.emit('join room', {
+                roomId: id
+            });
         }
         else if (myroom == id) {
+            
             $(this).text("Join");
             socket.emit('leave room');
         }
@@ -40,10 +46,11 @@ $(document).ready(function(){
 
     $(document).on('click', '.start_game', function() {
         var numBots = $('#add_bots :selected').val();
-        socket.emit('start game', {numBots : numBots});
+        socket.emit('start game', numBots);
     });
 
     $(document).on('click', '#log_out', function() {
+        socket.emit('disconnect');
         logOut();
     });
 
@@ -52,15 +59,31 @@ $(document).ready(function(){
      */
 
     // add a newly logged in user
-    socket.on('user added', function(data) {
-        $('#online_users ul').append(
-            $('<li/>').text(data.username)
-        );
+
+    socket.on('username checked', function(data) {
+        if (!data.dupe) {
+            $('#login_page').hide();
+            $('#menu_bar').show();
+            $('#gamelist_lobby').show();
+            $('#chat_box').show();
+
+            myroom = -1;
+            $('#username').text(myusername);
+            socket.emit('add user', {
+                username: myusername
+            });
+        }
+        else {
+            alert('This username has been used already.');
+        }
     });
 
-    // remove a user who just disconnected
-    socket.on('user disconnected', function(data) {
-        $('#online_users ul li').filter(function(){return this.text() ===  data.username;}).remove();
+    socket.on('update user list', function(data) {
+        $('#online_users ul').empty()
+        for (name in data.list)
+            $('#online_users ul').append(
+                $('<li/>').text(name)
+            );
     });
 
     // create a new room
@@ -71,6 +94,7 @@ $(document).ready(function(){
             .append($('<li/>')
             .text(data.host));
 
+        // create a bunch of options to customize if you're the host
         if (data.host === myusername) {
             myroom = data.roomId;
             var $deleteButton = $('<button/>')
@@ -95,7 +119,9 @@ $(document).ready(function(){
             
             $('#create_room').prop('disabled', true);
             myroom = data.roomId;
-        } else {
+        }
+        // otherwise, create only "join/leave" button 
+        else {
             var $joinLeaveRoom = $('<button/>')
                 .text('Join')
                 .addClass('join_leave_room')
@@ -123,13 +149,27 @@ $(document).ready(function(){
     });
 
     // add a user to a room
-    socket.on('user joined', function(data) {
-        var $newJoinedUser = $('<li/>').text(data.username);
-        $('.game_room').filter(function(){return this.value === data.roomId;})
-        .children("ul")
-        .append($newJoinedUser);
-        if (data.username === myusername)
-            $('#create_room').prop('disabled', true);
+    socket.on('update room', function(data) {
+        var list = $('.game_room').
+        filter(function(){return this.value === data.roomId;})
+        .children("ul");
+        
+        list.empty();
+        for (name in data.list)
+            list.append($('<li/>').text(name));
+
+        if (data.username == myusername) {
+            // this means you just left the room
+            if (myroom == data.roomId) {
+                $('#create_room').prop('disabled', false);
+                myroom = -1;
+            }
+            // here, you just entered the room
+            else{
+                $('#create_room').prop('disabled', true);
+                myroom = data.roomId;
+            }
+        }
     });
 
     // remove a user from a room
@@ -147,15 +187,8 @@ $(document).ready(function(){
 
 // log in page > lobby
 function enterLobby() {
-    $('#login_page').hide();
-    $('#menu_bar').show();
-    $('#gamelist_lobby').show();
-    $('#chat_box').show();
-
-    myroom = -1;
     myusername = $('#input_username').val();
-    $('#username').text(myusername);
-    socket.emit('add user', {username: myusername});
+    socket.emit('check username', myusername);
 }
 
 // lobby > log in page

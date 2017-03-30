@@ -26,7 +26,8 @@ function takeAction(id, location, index) {
 		index = -1;
 	// pass
 	if (index == -1) {
-		addLog(players[id].username + " passes", id);
+		if (turn > 1 || ((turn == 1) && (phase > 0)))
+			addLog(players[id].username + " passes", id);
         // get an action cube if you pass during buy phase
         if (phase == 2)
     		players[id].actionCubes ++;

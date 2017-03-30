@@ -10,23 +10,28 @@ function botAction(id) {
 		}
 		else {
 			var indexBest = 0;
-			for (i = 0; i < shops[activeShop].length; i ++) {
-				switch(activeShop) {
-					case 0: if (shops[activeShop][indexBest].object < shops[activeShop][i].object) 
-								indexBest = i;
-							break;
-					case 1: case 2: case 3:
+			switch(activeShop) {
+				case 0: // restaurant
+					for (i = 0; i < shops[activeShop].length; i ++)
+						if (shops[activeShop][indexBest].object < shops[activeShop][i].object) 
+							indexBest = i;
+					break;
+				case 1: case 2: case 3:	// flower shop
+					// don't buy the token if you already have enough
+					if (!needFlowerTokens(id, activeShop-1))
+						indexBest = -1;
+					else
+						for (i = 0; i < shops[activeShop].length; i ++) {
 							if (shops[activeShop][indexBest].object.quality < shops[activeShop][i].object.quality)
-								indexBest = i;
-							break;
-							// *todo - add a clever way to select a card
-							// *idea - early : get money & quality >> late game : get points
-					case 4: if (ran(shops[activeShop].length) == 0)
-								indexBest = i;
-							break;
-					default:
-							break;
-				}
+									indexBest = i;
+						}
+					break;
+				case 4: // library
+					// *todo : add a clever way to draw a card
+					indexBest = ran(shops[activeShop].length);
+					break;
+				default:
+						break;
 			}
 			// *todo - use different strategy for each type of bots 
 			// e.g. switching if statement ordering
@@ -104,34 +109,29 @@ function botArrangeFlower(id) {
 function botChooseTimeTokens(id) {
 	var wanted = [], unwanted = [];
 	
-	// the earlier if clause is located, the less priority it is
 	if (turn <= 3)
 		wanted.unshift(5);
 	if (players[id].hand.length >= 2 || shops[4].length == 0)
 		unwanted.push(4);
-	else if (players[id].hand.length == 0)
+	else if (players[id].hand.length <= 1)
 		wanted.unshift(4);
 	
 	// check what type of flowers it needs more
 	if (players[id].hand.length > 0) {
-		var requiredFlowers = players[id].hand[0].object.getFlowers();
-		var flowers = [[],[],[]];
-		for (const token of players[id].vases)
-			flowers[token.object.type].push(token.object.quality); 
 
 		if (shops[1].length == 0 || players[id].vases.length == players[id].numVases)
 			unwanted.push(1);
-		else if (flowers[0].length < requiredFlowers[0])
+		else if (needFlowerTokens(id, 0))
 			wanted.unshift(1);
 
 		if (shops[2].length == 0 || players[id].vases.length == players[id].numVases)
 			unwanted.push(2);
-		else if (flowers[1].length < requiredFlowers[1])
+		else if (needFlowerTokens(id, 1))
 			wanted.unshift(2);
 
 		if (shops[3].length == 0 || players[id].vases.length == players[id].numVases)
 			unwanted.push(3);
-		else if (flowers[2].length < requiredFlowers[2])
+		else if (needFlowerTokens(id, 2))
 			wanted.unshift(3);
 	}
 		
@@ -144,7 +144,8 @@ function botChooseTimeTokens(id) {
 		if(!wanted.includes(i) && !unwanted.includes(i))
 			middle.push(i);
 	shuffle(middle);
-	
+	shuffle(wanted);
+	shuffle(unwanted);
 	wanted = wanted.concat(middle, unwanted);
 	var botTT = players[id].getMyTimeTokens();
 	players[id].myPlayedTimeTokens = [];
@@ -156,4 +157,20 @@ function botChooseTimeTokens(id) {
 		id : id,
 		timeTokens : players[id].myPlayedTimeTokens
 	});
+}
+
+// 	return true if you need a token flower of type id
+// 	simply compare how many the first card requires and how many you have
+function needFlowerTokens (id, i) {
+	if (players[id].hand.length > 0) {
+		var want = players[id].hand[0].object.getFlowers()[i];
+		var have = 0;
+		for (const token of players[id].vases) {
+			if (token.object.type == i)
+				have ++;
+		}
+		return want > have;	// true if you want more than you have
+	}
+	else
+		return true; // want anyting if you have no card
 }

@@ -4,7 +4,7 @@ body {
 
 h1 {
     color: navy;
-    text-align: center
+    margin-left: 20px;
 }
 
 /**************************
@@ -46,7 +46,7 @@ h1 {
 
 #online_users {
 	float: right;
-	font: 20px Impact;
+	font: 15px Impact;
 	width: 15%;
 	height: 100%;
 	padding: 5px;
@@ -57,7 +57,7 @@ h1 {
 	background: orangered;
 }
 
-.start_game hover{
+.start_game:hover{
 	background: lawngreen;
 }
 /**************************	
@@ -80,7 +80,6 @@ chat_messages {
 	margin: 5px;
 	background:antiquewhite;
 }
-
 #chat_input_area {
 	position: absolute;
 	bottom: 0; 
@@ -180,35 +179,4 @@ table {
 	overflow-y: auto;
 	background: white;
 	border: black 2px solid;
-}
-
-.main_content {
-	max-width: 1000px;
-	margin-left: auto;
-	margin-right: auto;
-}
-
-#login_page {
-	margin: auto;
-	max-width: 500px;
-	max-height: 500px;
-}
-
-#login_page a {
-	display: block;
-	margin: auto
-}
-
-.login_form {
-	margin: auto;
-}
-
-.login_page_table {
-	background-color: white;
-	margin: auto;
-	padding: 40px;
-}
-
-.username {
-	text-align: left;
 }

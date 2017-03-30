@@ -18,23 +18,18 @@ function getRandomFlowerToken() {
 }
 
 function getRandomFlowerCard() {
-	// randomly hand crafted
-	// better be predetermined
-	var num = ran(2) + 2; // 2,3,4 flowers required
-	var a1 = ran(2);
-	var a2 = ran(num-a1);
-	var a3 = num-a1-a2;
-	var e = ran(6), level;	// the higher level, the higher quality is required
-	switch(e) {
-		case 0:
-			level = 2; break;
-		case 1: case 2:
-			level = 1; break;
-		default:
-			level = 0; break; 
-	}
-	var qual = Math.ceil((a1 + a2 + a3) * 2.5) + level * 3;  
-	return [a1, a2, a3, qual, 2 + level * 2];
+	var allCards = 	[	[[1,0,0], [0,1,0], [0,0,1]],
+						[[2,0,0], [0,2,0], [0,0,2], [1,1,0], [1,0,1], [0,1,1]], 
+						[[2,1,0], [2,0,1], [1,2,0], [1,0,2], [0,2,1], [0,1,2], [1,1,1]],
+						[[2,2,0], [2,0,2], [0,2,2], [2,1,1], [1,2,1], [1,1,2]],	
+						[[2,2,1], [2,1,2], [1,2,2]]	
+					];	// [ [1], [2], [3], [4], [5]
+	var c = randomWithWeight([1, 4, 6, 3, 1]);
+	var a = allCards[c][ran(allCards[c].length)];
+	var l = randomWithWeight([1, 2, 3]);
+
+	var qual = Math.ceil((a[0] + a[1] + a[2]) * 2.5) + l * 3;  
+	return [a[0], a[1], a[2], qual, (a[0] + a[1] + a[2] -1 ) * 2 + l * 2]; // score = 2*(total-1) + 2*level
 }
 
 function getTools() {
@@ -71,3 +66,16 @@ function generateAchievements () {
 
 }
 
+// get a random number in range (0... a.length-1)
+// where P(i) = a[i]/(sum a[k])
+function randomWithWeight(a) {
+	var total = 0, index = 0;
+	for (k = 0; k < a.length; k ++)
+		total += a[k];
+	var r = ran(total) + 1;
+	while(r > a[index] && index < a.length - 1) {
+		r = r - a[index];
+		index ++;
+	}
+	return index;
+}

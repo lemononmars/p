@@ -32,6 +32,18 @@ io.on('connection', function(socket){
    *  game list lobby 
    */ 
 
+  // check if the username has been claimed already
+  socket.on('check username', function(data) {
+    var dupe = false;
+    for (name in onlineUsers) {
+      if (name == data)
+        dupe = true;
+    }
+    socket.emit('username checked', {
+      dupe : dupe
+    });
+  });
+
   // add a new user who just logged in
   socket.on('add user', function(data) {
     addedUser = true;
@@ -41,14 +53,10 @@ io.on('connection', function(socket){
     socket.username = username;
     socket.room = -1;
     socket.userId = userId++;
-    socket.broadcast.emit('user added', {
-      username: username,
+    io.emit('update user list', {
+      list : onlineUsers
     });
 
-    for (p in onlineUsers)
-      socket.emit('user added', {
-        username: p
-      });
     for (r in gameRooms) {
       socket.emit('room created', {
         roomId : r,
@@ -61,8 +69,9 @@ io.on('connection', function(socket){
   socket.on('disconnect', function(data){
     if (addedUser) {
       delete onlineUsers[socket.username];
-      io.emit('user disconnected', {
-        username: socket.username,
+      addedUser = false;
+      io.emit('update user list', {
+        list : onlineUsers
       });
     }
   });
@@ -94,14 +103,15 @@ io.on('connection', function(socket){
     }
   });
 
-  // join other's game room
+  // join a game room
   socket.on('join room', function(data) {
     socket.room = data.roomId;
-    socket.join(data.roomId);
-    gameRooms[data.roomId][socket.username] = {};
-    io.emit('user joined', {
-      username: socket.username, 
-      roomId : data.roomId
+    socket.join(socket.room);
+    gameRooms[socket.room][socket.username] = {};
+    io.emit('update room', {
+      list : gameRooms[socket.room],
+      username : socket.username,
+      roomId : socket.room
     });
   });
 
@@ -109,9 +119,10 @@ io.on('connection', function(socket){
   socket.on('leave room', function(data) {
     if (socket.username in gameRooms[socket.room]) {
       socket.leave(socket.room);
-      delete gameRooms[socket.room][data.username];
-      io.emit('user left', {
-        username: data.username, 
+      delete gameRooms[socket.room][socket.username];
+      io.emit('update room', {
+        list : gameRooms[socket.room],
+        username : socket.username,
         roomId : socket.room
       });
       socket.room = -1;
@@ -126,9 +137,8 @@ io.on('connection', function(socket){
   // game sutaato !
   socket.on('start game', function(data) {
    
-    var numBots = Number(data.numBots);
+    var numBots = Number(data);
     var numPlayers = Object.keys(gameRooms[socket.room]).length;
-    console.log(numBots + numPlayers);
     // the game hosts 2-6 players
     if (numPlayers + numBots > 1 && numPlayers + numBots < 7) {
       console.log('game #' + socket.room + ' starts !!!');
@@ -136,9 +146,6 @@ io.on('connection', function(socket){
       var plist = []; // list of players
       for (const player in gameRooms[socket.room])
         plist.push(player);
-      
-      activeGames[socket.room] = gameRooms[socket.room];
-      delete gameRooms[socket.room];
 
       io.in(socket.room).emit('new game', {
         gameId : socket.room, 
@@ -146,13 +153,13 @@ io.on('connection', function(socket){
         numBots : numBots
       });
 
-      io.emit('room deleted', {
+      io.emit('game started', {
         roomId : socket.room
       });
     }
     else{
       socket.emit('errorMessage', {
-        errorText : numPlayers + numBots > 1 ? "Not enough players" : "Too many playesr"
+        errorText : numPlayers + numBots > 1 ? "Not enough players" : "Too many players"
       });
     }
   });
@@ -160,6 +167,7 @@ io.on('connection', function(socket){
   socket.on('leave game', function() {
     socket.room = -1;
   });
+
   // socket for in game stuff
 
   socket.on('give starting stuff', function(data) {
@@ -185,6 +193,10 @@ io.on('connection', function(socket){
     // send to all except sender
     socket.broadcast.to(socket.room).emit('action taken', data);  
   });
+
+  socket.on('end buy phase', function() {
+    io.in(socket.room).emit('buy phase ended');
+  })
 
   socket.on('arrange flower', function(data) {
     io.in(socket.room).emit('flower arranged', data);
