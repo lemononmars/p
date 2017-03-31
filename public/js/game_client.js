@@ -36,45 +36,146 @@ $(document).ready(function(){
         tieBreak = data.tieBreak;
     });
 
+    // get the new market from the server
     socket.on('market generated', function(data) {
         newMarket(data);
     });
 
+    // the server tells you to move on to the next phase
+    socket.on('to next phase', function(data) {
+        switch(data.phase) {
+            // from early-bird to planning phase
+            case 0: 
+                $myTimeTokenButtons = [];
+                var mtt = players[myID].getMyTimeTokens();
+                // display time tokens on the right to choose in planning phase
+                for (i = 0; i < 6; i ++) {
+                    $myTimeTokenButtons.push(new component(25, 25, players[myID].color, "black", 
+                    400, shopYCoor[i], timeTokenList[mtt[i]], "center", mtt[i]));
+                }
+                $submitButton = new component(25, 25, "black", "white", 400, shopYCoor[6], "OK", "center");
+                $statusBar.text = "Turn:" + turn + ": planning phase";
+                addLog("----- planning phase -----");
+                if (tutorial)
+                    addLog(">> Click on two time tokens on the board to swap");
+
+                // select time tokens for bots in advance !
+                if (myID == 0)
+                    for (const p in players)
+                        if (players[p].isBot) 
+                            botChooseTimeTokens(players[p].id);
+                phase = 1;
+                break;
+
+            // from planning to buy phase
+            case 1:
+                isDone = false;
+                collectTimeTokens();	// wait for this message from the server
+                $statusBar.text = "Turn " + turn + ": buy phase";
+                $passButton = new component(50, 25, "black", "white", 400, shopYCoor[6], "Pass", "center");
+                activeShop = 0;
+                activeTokenOrder = 0;
+                currentPlayer = getActiveTimeToken().id;
+                addLog("------ buy phase ------");
+                if (tutorial)
+                    addLog(">> On your turn, click on the goods to buy");
+                phase = 2;
+                break;
+
+            // from buy to after market phase
+            case 2:
+                addLog("------ after market phase ------");
+                if (tutorial)
+                    addLog(">> You may spend 2 action cubes to buy anything");
+                $statusBar.text = "Turn " + turn +": after market phase";
+                currentPlayer = tieBreak[0];
+                phase = 3;
+                break;
+
+            // from after market to flower arranging phase
+            case 3:
+				$addRibbonsButton = new component(75, 25, "red", "white", 400, shopYCoor[6], "Add 0 œ", "center", 0);
+				$submitButton = new component(60, 25, "white", "black", 480, shopYCoor[6], "Submit", "center");
+				$passButton = new component(75, 25, "black", "white", 545, shopYCoor[6], "Skip phase", "center");
+
+				selectedFlowerCard = -1;
+				selectedNumRibbons = 0;
+				addLog("------ arranging phase ------");
+				if(tutorial) {
+					addLog(">> Select a flower card & flower tokens to arrange");
+					addLog(">> or skip phase")
+				}
+				$statusBar.text = "Turn " + turn +": flower arranging phase";
+
+				// arrange flowers for bot in advance !
+				if (myID == 0)
+					for (const p in players)
+						if (players[p].isBot) {
+							botArrangeFlower(players[p].id);
+							socket.emit('finish arranging');
+						}
+                phase = 4;
+                break;
+
+            // from flower arranging phase to next turn (early bird phase)
+            case 4:
+                isDone = false;
+                if (checkEndGame()) {
+                    gameState = 3;
+                    var winner = 0;
+                    $statusBar.text = "Game End! Click here to return to lobby";
+                    addLog("------------- ------------- ------------- ");
+                    addLog("------------- Final Scoring ---------");
+                    addLog("------------- ------------- ------------- ");
+                    for (k = 0; k < numPlayers; k ++) {
+                        addLog(players[k].username + ' : ' + players[k].score, k);
+                        if ((players[k].score > players[winner].score) ||
+                            (players[k].score == players[winner].score && tieBreak.indexOf(k) > tieBreak.indexOf(winner)))
+                            winner = k;
+                    }
+                    addLog('||', winner);
+                    addLog('||  The winner is  ::: ' + players[winner].username + ' :::', winner);
+                    addLog('||', winner);
+                    addLog("Play Time: " + (Date.getTime() - timeStart)/60000 + " minutes");
+                    if (myID == 0)
+                        socket.emit('game end');
+                } 
+                else {
+                    // see if anyone is eligible for any achievement
+                    for (const ac of $achievements) {
+                        for (i = 0; i < numPlayers; i ++)
+                            if (ac.check(tieBreak[i]))
+                                players[tieBreak[i]].getAchievementRewards(ac.getRewards());
+                    }
+                    turn ++;
+                    phase = 0;
+                    currentPlayer = tieBreak[0];
+                    addLog("*");
+                    addLog("***** Turn " + turn + "******");
+                    addLog("*");
+                    addLog("----- early-bird phase -----");
+                    if (myID == 0)
+                        socket.emit('generate market', generateGoods(numPlayers));
+                }
+                break;
+        } // end switch
+    });
+
     socket.on('time tokens submitted', function(data) {
-        addLog(players[data.id].username + ' has submitted time tokens', data.id);
+        if (!players[data.id].isBot)
+            addLog(players[data.id].username + ' has submitted time tokens', data.id);
         players[data.id].myPlayedTimeTokens = data.timeTokens;
         numPlayersDone ++;
         if (myID == 0 && numPlayersDone >= numPlayers) {
-            socket.emit('tokens ready');
+            socket.emit('end phase', {
+                phase : 1
+            });
             numPlayersDone = 0;
         }
     });
 
-    socket.on('to buy phase', function(data) {
-        isDone = false;
-        collectTimeTokens();	// wait for this message from the server
-        phase = 2;
-        $statusBar.text = "Turn " + turn + ": buy phase";
-        $passButton = new component(50, 25, "black", "white", 400, 265, "Pass", "center");
-        activeShop = 0;
-        activeTokenOrder = 0;
-        currentPlayer = getActiveTimeToken().id;
-        addLog("------ buy phase ------");
-        if (tutorial)
-            addLog(">> On your turn, click on the goods to buy");
-    });
-
     socket.on('action taken', function(data) {
         takeAction(data.id, data.location, data.index);
-    });
-
-    socket.on('buy phase ended', function() {
-        addLog("------ after market phase ------");
-        if (tutorial)
-            addLog(">> You may spend 2 action cubes to buy anything");
-        $statusBar.text = "Turn " + turn +": after market phase";
-        currentPlayer = tieBreak[0];
-        phase = 3;	
     });
 
     socket.on('flower arranged', function(data) {
@@ -84,36 +185,11 @@ $(document).ready(function(){
     socket.on('player finished arranging', function() {
         numPlayersDone ++;
         if (myID == 0 && numPlayersDone >= numPlayers) {
-            socket.emit('to next turn');
+            socket.emit('end phase', {
+                phase : 4
+            });
             numPlayersDone = 0;
         }
     });
 
-    socket.on('next turn', function() {
-        isDone = false;
-        if (checkEndGame()) {
-            gameState = 3;
-            var winner = 0;
-            addLog("------------- ------------- ------------- ");
-            addLog("------------- Final Scoring ---------");
-            addLog("------------- ------------- ------------- ");
-            for (k = 0; k < numPlayers; k ++) {
-                addLog(players[k].username + ' : ' + players[k].score, k);
-                if ((players[k].score > players[winner].score) ||
-                    (players[k].score == players[winner].score && tieBreak.indexOf(k) > tieBreak.indexOf(winner)))
-                    winner = k;
-            }
-            $statusBar.text = "Game End! Click here to return to lobby";
-            addLog('||', winner);
-            addLog('||  The winner is  ::: ' + players[winner].username + ' :::', winner);
-            addLog('||', winner);
-            if (myID == 0)
-                socket.emit('game end');
-		} else {
-            turn ++;
-            phase = 0;
-            if (myID == 0)
-                socket.emit('generate market', generateGoods(numPlayers));
-        }
-    });
 });

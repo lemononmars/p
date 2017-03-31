@@ -36,23 +36,19 @@ function botAction(id) {
 			// *todo - use different strategy for each type of bots 
 			// e.g. switching if statement ordering
 			if (activeShop == 5) {
-				var toolType = [];
-				for (i = 0; i < shops[5].length; i ++)
-					toolType.push(shops[5][i].object.type);
 				// get ahead on tie break track first
-				if (toolType.includes(6) && tieBreak.indexOf(id) >= numPlayers - 2)
-					indexBest = toolType.indexOf(6);
+				if (tieBreak.indexOf(id) >= numPlayers - 2)
+					indexBest = 4;
 				// then try to get a clock upgrade
-				else if (toolType.includes(0) && players[id].time <= 2 && players[id].money >= 6)
-					indexBest = toolType.indexOf(0);
+				else if (players[id].time <= 2 && players[id].money >= 6)
+					indexBest = 0;
 				// then try to expand your vases
-				else if (toolType.includes(2) && players[id].numVases <= 4 && players[id].money >= 3)
-					indexBest = toolType.indexOf(2);
+				else if ((players[id].numVases <= 4 || players[id].numVases >= players[id].vases.length)
+						&& players[id].money >= 3)
+					indexBest = 1;
 				// then see if you want some ribbons
-				else if (toolType.includes(3) && players[id].numRibbons <= 2 && players[id].money >= 1)
-					indexBest = toolType.indexOf(3);
-				else if (toolType.includes(4) && players[id].numRibbons <= 2 && players[id].money >= 1)
-					indexBest = toolType.indexOf(4);
+				else if (players[id].numRibbons <= 2 && players[id].money >= shops[5][2].object.cost + 1)
+					indexBest = 2;
 				// *todo - determine if bot wants extra flower
 				// if all fails, just pass.....
 				else

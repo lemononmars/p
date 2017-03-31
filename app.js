@@ -136,13 +136,13 @@ io.on('connection', function(socket){
 
   // game sutaato !
   socket.on('start game', function(data) {
-   
     var numBots = Number(data);
     var numPlayers = Object.keys(gameRooms[socket.room]).length;
-    // the game hosts 2-6 players
+    // check if the number of players is valid (2-6)
     if (numPlayers + numBots > 1 && numPlayers + numBots < 7) {
-      console.log('game #' + socket.room + ' starts !!!');
-
+      console.log('game #', socket.room, ' starts !!!');
+      console.log('number of players:', numPlayers);
+      console.log('number of bots:', numBots);
       var plist = []; // list of players
       for (const player in gameRooms[socket.room])
         plist.push(player);
@@ -158,9 +158,8 @@ io.on('connection', function(socket){
       });
     }
     else{
-      socket.emit('errorMessage', {
-        errorText : numPlayers + numBots > 1 ? "Not enough players" : "Too many players"
-      });
+      var errorText = (numPlayers + numBots <= 1) ? 'Not enough players' : 'Too many players';
+      socket.emit('errorMessage', errorText);
     }
   });
 
@@ -178,25 +177,18 @@ io.on('connection', function(socket){
     io.in(socket.room).emit('market generated', data);
   });
 
-  socket.on('submit time tokens', function(data) {
-    io.in(socket.room).emit('time tokens submitted', {
-      id : data.id,
-      timeTokens : data.timeTokens
-    })
+  socket.on('end phase', function(data) {
+    io.in(socket.room).emit('to next phase', data);
   });
 
-  socket.on('tokens ready', function() {
-    io.in(socket.room).emit('to buy phase');
+  socket.on('submit time tokens', function(data) {
+    io.in(socket.room).emit('time tokens submitted', data);
   });
 
   socket.on('take action', function(data) {
     // send to all except sender
     socket.broadcast.to(socket.room).emit('action taken', data);  
   });
-
-  socket.on('end buy phase', function() {
-    io.in(socket.room).emit('buy phase ended');
-  })
 
   socket.on('arrange flower', function(data) {
     io.in(socket.room).emit('flower arranged', data);
@@ -205,10 +197,6 @@ io.on('connection', function(socket){
   socket.on('finish arranging', function() {
     io.in(socket.room).emit('player finished arranging');
   })
-
-  socket.on('to next turn', function() {
-    io.in(socket.room).emit('next turn');
-  });
 
   socket.on('game end', function() {
 

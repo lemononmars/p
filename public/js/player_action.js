@@ -54,7 +54,8 @@ function takeAction(id, location, index) {
 			else {
 				addLog(players[id].username + " buys a " + shopList[location], id);
 				players[id].getFlowerToken(shops[location][index].object);
-				players[id].money -= 1;
+				if (!buyFlowerToolToken)
+					players[id].money -= 1;
 				shops[location].splice(index, 1);
                 if(buyFlowerToolToken)
                     buyFlowerToolToken = false;
@@ -73,14 +74,16 @@ function takeAction(id, location, index) {
 			}
 			break;
 		case 5:
-			if (players[id].money < shops[5][index].object.cost) {
+			if (players[id].money < shops[5][index].object.getCost()) {
 				addLog("Not enough money");
 				return false;
 			}
 			addLog(players[id].username + " buys " + shops[5][index].object.toString(), id);
 			players[id].getToolToken(shops[5][index].object);
-			players[id].money -= shops[5][index].object.cost;
-			shops[5].splice(index, 1);
+			players[id].money -= shops[5][index].object.getCost();
+			shops[5][index].object.levelDown(1);
+			shops[5][index].newText(shops[5][index].object.toSymbol());
+			$toolLevels[index].newText(shops[5][index].object.getLevelBar());
 			break;
 		default:	// invalid location
 			addLog("What are you doing?", id);

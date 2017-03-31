@@ -4,6 +4,7 @@ var numBots = 0;
 var gameState;		//	1 = loading screen, 2 = playing, 3 = game end
 var turn;			// number of turns passed, starting at 1
 var phase;
+var timeStart;		// time the game starts
 /* phase: each round consists of 4 phases
 	0. early bird phase	- each player can spend 3 action cubes to buy anything in the market
 	1. planning	phase	- each player assigns each shop a time token simultaneously
@@ -23,29 +24,23 @@ var handLimit = 4;
 var tutorial = true;	// on: detailed description of each phase is displayed in log
 var isDone = false;		// check if you finish and are waiting for other players
 
+var ctx;				// pointed to the canvas
 var $statusBar;			// grey bar at the top, showing current turn & phase
 var $shopLabels; 		// mainboard consisting of shop names
+var $toolLevels;		// display the level of each tool
 var shops; 				// list of goods components displaying in each shop
 var activeShop;			// which shop is opening now (buy phase):
+
 var activeTokenOrder;	// which token in the shop is taking an action
 var $allPlayedTimeTokens;	// list of played time tokens on the board (buy phase)
 var $myTimeTokenButtons;	// time token components displayed on the board (planning phase)
 var tieBreak;			// determine who buys first in case of tie
 var $tieBreakTrack;		// components for buy order track
+
 var $passButton;			// pass button used in many phases
 var $submitButton;		// submit and verify your flower arrangement
 var $addRibbonsButton;	// component for adding more ribbons (arranging phase) 
-
-var playerBoards;		// player board displays points, flower tokens, etc.
-
-var botNames = ["Mel", "Game", "Job", "Lui", "Poupe", "Due", "Au", "Som", "Benz", "Aon", "Oak", "Boat", "Tana"];
-var playerColors = ["aquamarine", "bisque", "coral", "darkseagreen", "peru", "lightcyan"];
-var shopList = ["Restaurant", "Rose", "Orchid", "Mums", "Bookstore", "Tool"];
-var shopColors = ["yellow", "pink", "skyblue", "white", "purple", "lightgreen"];
-var shopTColors = ["black", "black", "white", "black", "white", "black"];
-var shopYCoor = [55, 85, 115, 145, 175, 235, 265];
-var timeTokenList = [0, 1, 2, 3, 4, "x", "xx"];
-var bonusSymbols = ["^", "$", "+"];		// quality, money, score
+var $achievements;		// component for achievements
 
 //////////////////////////////////////////////////////////////////////////////////////
 // add a player after username is submitted and display waiting room
@@ -70,6 +65,8 @@ function startGame(data) {
 	gameState = 2;
 	turn = 1;
 	phase = 0;
+	var d = new Date();
+	timeStart = d.getTime();
 
 	// only let one player sends the server an inquiry
 	if (myID === 0) {
@@ -89,7 +86,11 @@ function startGame(data) {
 	}
 
 	$('#gamelog').empty();
+	addLog("*");
+    addLog("***** Turn " + turn + "******");
+    addLog("*");
 	myGameArea.start();	// add the main canvas
+	ctx = myGameArea.context;
 	boardSetup();	// add labels on the board
 	currentPlayer = tieBreak[0];
 }
@@ -141,32 +142,6 @@ function checkForInput() {
 			} 
 			// not my turn
 			// first check if we should move on
-			else if(currentPlayer < 0) {
-				$myTimeTokenButtons = [];
-				var mtt = players[myID].getMyTimeTokens();
-				// display time tokens on the right to choose in planning phase
-				for (i = 0; i < 6; i ++) {
-					$myTimeTokenButtons.push(new component(25, 25, players[myID].color, "black", 
-					400, shopYCoor[i], timeTokenList[mtt[i]], "center", mtt[i]));
-				}
-				// submit button
-				$submitButton = new component(25, 25, "black", "white", 400, shopYCoor[6], "OK", "center");
-				$statusBar.text = "Turn:" + turn + ": planning phase";
-				addLog("*");
-				addLog("***** Turn " + turn + "******");
-				addLog("*");
-				addLog("----- planning phase -----");
-				if (tutorial)
-					addLog(">> Click on two time tokens on the board to swap");
-
-				// select time tokens for bots in advance !
-				if (myID == 0)
-					for (const p in players)
-						if (players[p].isBot) 
-							botChooseTimeTokens(players[p].id);
-
-				phase = 1;
-			}
 			else { // otherwise, let bot takes turn
 				if (players[currentPlayer].isBot && myID == 0)
 					botAction(currentPlayer);	
@@ -284,32 +259,8 @@ function checkForInput() {
 				}
 			}
 			// when everyone got a chance to buy, move on to flower arranging phase
-			else if (currentPlayer < 0) {
-				$addRibbonsButton = new component(75, 25, "red", "white", 400, 265, "Add 0 œ", "center", 0);
-				$submitButton = new component(60, 25, "white", "black", 480, 265, "Submit", "center");
-				$passButton = new component(75, 25, "black", "white", 545, 265, "Skip phase", "center");
-
-				phase = 4;
-				selectedFlowerCard = -1;
-				selectedNumRibbons = 0;
-				addLog("------ arranging phase ------");
-				if(tutorial) {
-					addLog(">> Select a flower card & flower tokens to arrange");
-					addLog(">> or skip phase")
-				}
-				$statusBar.text = "Turn " + turn +": flower arranging phase";
-
-				// arrange flowers for bot in advance !
-				if (myID == 0)
-					for (const p in players)
-						if (players[p].isBot) {
-							botArrangeFlower(players[p].id);
-							socket.emit('finish arranging');
-						}
-			}
-			else {
-				if (players[currentPlayer].isBot && myID == 0)
-					botAction(currentPlayer);
+			else if (players[currentPlayer].isBot && myID == 0) {
+				botAction(currentPlayer);
 			}
 		}
 		/////////////////////////////////
@@ -322,9 +273,9 @@ function checkForInput() {
 				if($submitButton.clicked()) {
 					if (selectedFlowerCard < 0) {
 						if (players[myID].hand.length == 0)
-							addLog("Nothing to arrange. Press -Skip Phase-");
+							alert('Nothing to arrange. Press -Skip Phase-');
 						else
-							addLog("Select a flower card !");
+							alert('Select a flower card !');
 					}
 					else {
 						myGameArea.x = false;
@@ -355,7 +306,7 @@ function checkForInput() {
 						}
 					}
 				}
-				// finish and move on to the next round
+				// finish this phase and wait for other players
 				else if(!isDone && $passButton.clicked()) {
 					// clear borders
 					for (i = 0; i < players[myID].vases.length; i ++) 
@@ -434,12 +385,12 @@ function updateBoard() {
 	for (i = 0; i < 6; i ++) {
 		$shopLabels[i].update();
 		// display goods
-		if (phase >= 1) {
+		if (phase >= 0) {
 			for (j = 0; j < shops[i].length; j ++) {
 				shops[i][j].update();
 				if (i == 4) { // cards need extra text
-					var cardComp = shops[4][j];	// component, no the actual card
-					fillCard(cardComp.width, cardComp.height, cardComp.x, cardComp.y, cardComp.object);
+					var $cardComp = shops[4][j];	// component, no the actual card
+					fillCard($cardComp.width, $cardComp.height, $cardComp.x, $cardComp.y, $cardComp.object);
 				}
 			}
 		}
@@ -452,7 +403,8 @@ function updateBoard() {
 			for (const aptt of $allPlayedTimeTokens[i])
 				aptt.update();
 	}
-	
+	for (const tl of $toolLevels)
+		tl.update();
 	for (const tbt of $tieBreakTrack) 
 		tbt.update();
 	
@@ -465,29 +417,17 @@ function updateBoard() {
 			$addRibbonsButton.update();
 	}
 	players[myID].update();
-	// *todo display some info of other players
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-// 							add extra text on components								//
-///////////////////////////////////////////////////////////////////////////////////////////
-
-// add text on a card
-function fillCard(width, height, x, y, card) {
-	ctx = myGameArea.context;
-	ctx.font = "15px Arial";
-	ctx.textAlign = "center";
-	ctx.fillStyle = shopColors[1];
-	var f = card.getFlowers();
-	for (k = 0; k < 3; k ++) {
-		ctx.fillStyle = shopColors[k+1];
-		ctx.fillText(f[k],					x + (2*k+1)*width/6, y+15);
-		ctx.fillText("*", 					x + (2*k+1)*width/6, y+15+ height/4);
+	var index = 0;
+	for (pp = 0; pp < numPlayers; pp ++) {
+		if (pp != myID) {
+			players[pp].miniUpdate(index);
+			index ++;
+		}
 	}
-	ctx.fillStyle = "white";
-	ctx.font = "10px Cordia";
-	ctx.fillText("Qual:" + card.quality, x + 3*width/6, y+10 + 2*height/4);
-	ctx.fillText("Score:" + card.score, x + 3*width/6, y+10 + 3*height/4);
+
+	$shopLabels[6].update();	// 'achievements' label
+	for (const a of $achievements)
+		a.update();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////	
@@ -587,7 +527,9 @@ function nextPlayer () {
 			return getActiveTimeToken().id;
 		}
 		else if (myID == 0) {
-			socket.emit('end buy phase');
+			socket.emit('end phase', {
+				phase : phase
+			});
 			return -1;
 		}
 	}
@@ -596,8 +538,11 @@ function nextPlayer () {
 		var index = tieBreak.indexOf(currentPlayer);
 		if (index < tieBreak.length - 1)
 			return tieBreak[index + 1];
-		else
-			return -1;
+		else if(myID == 0) {
+			socket.emit('end phase', {
+				phase : phase	
+			});
+		}
 	}
 }
 
@@ -607,8 +552,9 @@ function getActiveTimeToken() {
 
 // game end when one of the following conditions is met
 // 1. 10 turns has passed
-// 2. some player gets at least 8 stars in one color
+// 2. some player gets at least 7 stars in one color
 // 3. some player gets at least 50 points
+
 function checkEndGame() {
 	var turnThreshold = 10,
 	scoreThreshold = 40,
@@ -662,7 +608,6 @@ function component(width, height, color, textColor, x, y, text, align, object) {
 	this.border = false;
 	this.borderColor = "white";
 	this.update = function() {
-		ctx = myGameArea.context;
 		ctx.fillStyle = color;
 		ctx.fillRect(this.x, this.y, this.width, this.height);
 		ctx.fillStyle = textColor;
@@ -703,5 +648,8 @@ function component(width, height, color, textColor, x, y, text, align, object) {
 			this.textx = this.x + 5;
 			this.texty = this.y + this.height / 2 + 5;
 		}
+	};
+	this.newText = function(t) {
+		this.text = t;
 	};
 }
