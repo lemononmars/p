@@ -212,7 +212,7 @@ function player(id, username, color, bot) {
 		ctx.textAlign = "left";
 		ctx.fillText("Score:" + this.score, 			left + 55, top + 10);
 		ctx.fillText("$" + this.money, 					left + 125, top + 10);
-		ctx.fillText("#cards:" + this.hand.length, 		left + 235, top + 50);
+		ctx.fillText("#Bouq:" + this.numPlayedCards, 	left + 235, top + 50);
 		// add stars and corresponding bonus symbols
 		for (j = 0; j < 3; j ++) {
 			ctx.fillStyle = shopColors[j+1];

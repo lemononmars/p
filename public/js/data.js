@@ -38,7 +38,7 @@ var achievementString = [	'6 pink', '6 blue', '6 white',
 var achievementRewards = [	[0,1,1,2,0], [1,0,1,2,0], [1,1,0,2,0],
 							[0,0,2,1,2], [0,2,0,1,2], [2,0,0,1,2],
 							[1,1,1,0,2],
-							[1,1,1,2,0]];
+							[0,0,0,3,0]];
 
 var achievementRewardString = [ 	'blue + white + 2 VP', 'pink + white + 2 VP', 'blue + pink + 2 VP',
 						'2 white + 1 VP + $2', '2 blue + 1 VP + $2', '2 pink + 1 VP + $2',
