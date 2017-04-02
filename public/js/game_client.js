@@ -148,6 +148,8 @@ $(document).ready(function(){
                     addLog('||', winner);
                     addLog('||  The winner is  ::: ' + players[winner].username + ' :::', winner);
                     addLog('||', winner);
+
+                    // add miscellaneous info to game log
                     var timeEnd = new Date();
                     var playtime = timeEnd.getTime() - timeStart;
                     addLog("Play Time: " + Math.floor(playtime/60000) + ":" + 
@@ -161,8 +163,17 @@ $(document).ready(function(){
                     $('#gamelog').append($feedback);
 	                $('#gamelog').scrollTop($('#gamelog')[0].scrollHeight);
                    
+                    // save game info
+                    var gameinfo = '';
+                    for (k = 0; k < numPlayers; k ++) {
+                        gameinfo += 'p' + k + ' s' + players[k].score;
+                    }
+                    gameinfo += ' turn' + turn;
+                    
                     if (myID == 0)
-                        socket.emit('game end');
+                        socket.emit('game end', {
+                            text: gameinfo
+                        });
                 } 
                 else {
                     turn ++;
@@ -214,4 +225,13 @@ $(document).ready(function(){
         myroom = -1;
         $('#create_room').prop('disabled', false);
     });
+
+    socket.on('save game', function(data) {
+        $.ajax({
+            type: 'POST',
+            url: data.url,
+            data: data.text,
+            dataType: 'text'
+        });
+    })
 });

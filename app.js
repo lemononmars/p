@@ -198,11 +198,16 @@ io.on('connection', function(socket){
     io.in(socket.room).emit('player finished arranging');
   })
 
-  socket.on('game end', function() {
+  socket.on('game end', function(data) {
     io.in(socket.room).emit('game finished');
     delete gameRooms[socket.room];
     io.emit('room deleted', {
         roomId : socket.room
     });
+    socket.emit('save game', {
+      url : __dirname + '/save.txt',
+      text: data.gameinfo
+    });
+   
   });
 });
