@@ -89,7 +89,7 @@ $(document).ready(function(){
     // create a new room
     socket.on('room created', function(data) {
         var $newRoom = $('<div/>');
-        var $buttonArea = $('<div/>');
+        var $options = $('<div/>');
         var $participants = $('<ul/>')
             .append($('<li/>')
             .text(data.host));
@@ -112,7 +112,8 @@ $(document).ready(function(){
                     $('<option/>').val(i).text(i)
                 );
 
-            $buttonArea.append($deleteButton)
+            $options.addClass('room_options')
+                .append($deleteButton)
                 .append($startButton)
                 .append($('<p/>').text('#bots'))
                 .append($addBots);
@@ -126,12 +127,12 @@ $(document).ready(function(){
                 .text('Join')
                 .addClass('join_leave_room')
                 .val(data.roomId)
-            $buttonArea.append($joinLeaveRoom);
+            $options.append($joinLeaveRoom);
         }
 
         $newRoom.addClass('game_room')
         .val(data.roomId)
-        .append($buttonArea)
+        .append($options)
         .append($participants);
 
         $('#open_rooms').append($newRoom);
@@ -178,6 +179,11 @@ $(document).ready(function(){
         $room.children('ul li')
             .filter(function(){return this.text ===  data.username;})
             .remove();
+    });
+
+    socket.on('game started', function(data) {
+        var $room = $('.game_room').filter(function(){return this.value == data.roomId;});
+        $room.children('div').empty();  // clear option area
     });
 
     socket.on('errorMessage', function(data) {

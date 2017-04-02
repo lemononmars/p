@@ -13,6 +13,7 @@ var timeStart;		// time the game starts
 	4. arranging phase	- players arrange any number of flowers from their hand
 */
 var buyFlowerToolToken = false;	// boolean for tool token that allows you to buy leftover flower
+var autoplay = false;	// true = let bot play for you
 
 var currentPlayer;		// who is playing
 var myusername;			
@@ -121,7 +122,7 @@ function checkForInput() {
 		// each player, in tie break order, may spend 3 action cubes to buy anything in the market
 		/////////////////////////////////
 		if(phase == 0) {
-			if(myID == currentPlayer) {
+			if(myID == currentPlayer && !autoplay) {
 				if (players[myID].actionCubes >= 3) {
 					if(myGameArea.x && myGameArea.y) {
 						if ($passButton.clicked()) {
@@ -197,35 +198,29 @@ function checkForInput() {
 			if(getActiveTimeToken().value >= 5) {
 				currentPlayer = nextPlayer();
 			}
-			else if(currentPlayer == myID) {
+			else if(currentPlayer == myID && !autoplay) {
 				// forced to pass if nothing is left :(
 				if(activeShop < 6 && shops[activeShop].length === 0 && !buyFlowerToolToken) {
 					playerAction(myID, activeShop, -1);
 				} else if(myGameArea.x && myGameArea.y) {
 					for (i = 0; i < shops[activeShop].length; i ++) {
 						if(shops[activeShop][i].clicked())
-							playerAction(myID, activeShop, i);
+							if(!buyFlowerToolToken || (activeShop >=1 && activeShop <=3))
+								playerAction(myID, activeShop, i);
 					}
 					// you can discard any flower tokens and cards during your turn
-					// will add confirm button later. for the time being, please don't accidentally click on them
 					for (i = 0; i < players[myID].vases.length; i ++) {
 						if (players[myID].vases[i].clicked()) {
-							if (window.confirm("Discard the flower token ?"))
+							if (window.confirm("Discard this flower token ?"))
 								players[myID].discardFlowerToken(i);
 						}
 					}
 					for (i = 0; i < players[myID].hand.length; i ++) {
 						if (players[myID].hand[i].clicked())
-							if (window.confirm("Discard the card ?"))
+							if (window.confirm("Discard this card ?"))
 								players[myID].discardFlowerCard(i);
 					}
 					// special phase when you choose the tool that lets you buy any leftover flower
-					if (buyFlowerToolToken) {
-						for (i = 1; i < 4; i ++)
-							for (j = 0; j < shops[i].length; j ++)
-								if (shops[i][j].clicked())
-									playerAction(myID, i, j);
-					}
 					if($passButton.clicked()) {
 						playerAction(myID, activeShop, -1);
 					}
@@ -240,7 +235,7 @@ function checkForInput() {
 		// each player may spend 2 action cubes to buy anything left in the market
 		/////////////////////////////////
 		else if(phase == 3) {
-			if(myID == currentPlayer) {
+			if(myID == currentPlayer && !autoplay) {
 				if (players[myID].actionCubes >= 2) {
 					if(myGameArea.x && myGameArea.y) {
 						if ($passButton.clicked()) {
@@ -306,7 +301,7 @@ function checkForInput() {
 						}
 					}
 				}
-				// finish this phase and wait for other players
+				// click pass button >> finish this phase and wait for other players
 				else if(!isDone && $passButton.clicked()) {
 					// clear borders
 					for (i = 0; i < players[myID].vases.length; i ++) 

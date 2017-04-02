@@ -11,6 +11,12 @@ $(document).ready(function(){
 		$('.gamelog_button').toggle();
     });
 
+    $('.autoplay_button').click(function() {
+        $('.autoplay_button').toggle();
+        players[myID].isBot = !players[myID].isBot;
+        autoplay = !autoplay;
+    });
+
     socket.on('new game', function(data) {
         $('#gamelist_lobby').hide();
         $('#menu_bar').hide();
@@ -120,6 +126,12 @@ $(document).ready(function(){
             // from flower arranging phase to next turn (early bird phase)
             case 4:
                 isDone = false;
+                // see if anyone is eligible for any achievement
+                 for (const ac of $achievements) {
+                        for (i = 0; i < numPlayers; i ++)
+                            if (ac.check(tieBreak[i]))
+                                players[tieBreak[i]].getAchievementRewards(ac.getRewards());
+                    }
                 if (checkEndGame()) {
                     gameState = 3;
                     var winner = 0;
@@ -130,23 +142,29 @@ $(document).ready(function(){
                     for (k = 0; k < numPlayers; k ++) {
                         addLog(players[k].username + ' : ' + players[k].score, k);
                         if ((players[k].score > players[winner].score) ||
-                            (players[k].score == players[winner].score && tieBreak.indexOf(k) > tieBreak.indexOf(winner)))
+                            (players[k].score == players[winner].score && tieBreak.indexOf(k) < tieBreak.indexOf(winner)))
                             winner = k;
                     }
                     addLog('||', winner);
                     addLog('||  The winner is  ::: ' + players[winner].username + ' :::', winner);
                     addLog('||', winner);
-                    addLog("Play Time: " + (Date.getTime() - timeStart)/60000 + " minutes");
+                    var timeEnd = new Date();
+                    var playtime = timeEnd.getTime() - timeStart;
+                    addLog("Play Time: " + Math.floor(playtime/60000) + ":" + 
+                        Math.floor((playtime%60000)/1000) + " minutes");
+                    addLog("Number of turns: " + turn);
+                    addLog("--------------------------------------------");
+                    addLog("รบกวนตอบแบบสอบถาม เพื่อนำพัฒนาเกมนี้ให้สนุกยิ่งขึ้นครับ");
+                    var $feedback = $('<a/>').text("[ลิงค์แบบสอบถาม]")
+                        .attr("href", " https://goo.gl/forms/JFXs6f1p2ksIavcH3")
+                        .attr("target", "_blank");
+                    $('#gamelog').append($feedback);
+	                $('#gamelog').scrollTop($('#gamelog')[0].scrollHeight);
+                   
                     if (myID == 0)
                         socket.emit('game end');
                 } 
                 else {
-                    // see if anyone is eligible for any achievement
-                    for (const ac of $achievements) {
-                        for (i = 0; i < numPlayers; i ++)
-                            if (ac.check(tieBreak[i]))
-                                players[tieBreak[i]].getAchievementRewards(ac.getRewards());
-                    }
                     turn ++;
                     phase = 0;
                     currentPlayer = tieBreak[0];
@@ -192,4 +210,8 @@ $(document).ready(function(){
         }
     });
 
+    socket.on('game finished', function() {
+        myroom = -1;
+        $('#create_room').prop('disabled', false);
+    });
 });

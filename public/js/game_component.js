@@ -134,6 +134,7 @@ function achievementCard (type, x, y) {
 	this.x = x;
 	this.y = y;
 	this.claimed = false;
+	this.claimer = 0;
 
 	this.check = function(id) {
 		var stars = players[id].getStars();
@@ -164,11 +165,13 @@ function achievementCard (type, x, y) {
 				this.claimed = (stars[0] >= 3 && stars[1] >= 3 && stars[2] >= 3);
 				break;
 			case 7:
-				this.claimed = (players[id].numPlayedCards >= 6);
+				this.claimed = (players[id].numPlayedCards >= 5);
 				break;
 			default:
 				break;
 		}
+		if (this.claimed)
+			this.claimer = id;
 		return this.claimed;
 	};
 
@@ -187,88 +190,89 @@ function achievementCard (type, x, y) {
 		ctx.font = "15px";
 		ctx.textAlign = "center";
 		// fill achievement's requirement
-		if (!this.claimed) {
-			switch(this.type) {
-				case 0: case 1: case 2:
-					ctx.fillStyle = shopColors[this.type + 1];
-					ctx.fillText('★★★★★★', this.x + 60, this.y + 20);
-					break;
-				case 3:
-					ctx.fillStyle = shopColors[1];
-					ctx.fillText('★★★★', this.x + 30, this.y + 20);
-					ctx.fillStyle = shopColors[2];
-					ctx.fillText('★★★★', this.x + 90, this.y + 20);
-					break;
-				case 4:
-					ctx.fillStyle = shopColors[1];
-					ctx.fillText('★★★★', this.x + 30, this.y + 20);
-					ctx.fillStyle = shopColors[3];
-					ctx.fillText('★★★★', this.x + 90, this.y + 20);
-					break;
-				case 5:
-					ctx.fillStyle = shopColors[2];
-					ctx.fillText('★★★★', this.x + 30, this.y + 20);
-					ctx.fillStyle = shopColors[3];
-					ctx.fillText('★★★★', this.x + 90, this.y + 20);
-					break;
-				case 6:
-					ctx.fillStyle = shopColors[1];
-					ctx.fillText('★★★', this.x + 20, this.y + 20);
-					ctx.fillStyle = shopColors[2];
-					ctx.fillText('★★★', this.x + 60, this.y + 20);
-					ctx.fillStyle = shopColors[3];
-					ctx.fillText('★★★', this.x + 100, this.y + 20);
-					break;
-				case 7:
-					ctx.fillStyle = "white";
-					ctx.fillText('6 bouquets', this.x + 60, this.y + 20);
-					break;
-			}
+		
+		switch(this.type) {
+			case 0: case 1: case 2:
+				ctx.fillStyle = shopColors[this.type + 1];
+				ctx.fillText('★★★★★★', this.x + 60, this.y + 20);
+				break;
+			case 3:
+				ctx.fillStyle = shopColors[1];
+				ctx.fillText('★★★★', this.x + 30, this.y + 20);
+				ctx.fillStyle = shopColors[2];
+				ctx.fillText('★★★★', this.x + 90, this.y + 20);
+				break;
+			case 4:
+				ctx.fillStyle = shopColors[1];
+				ctx.fillText('★★★★', this.x + 30, this.y + 20);
+				ctx.fillStyle = shopColors[3];
+				ctx.fillText('★★★★', this.x + 90, this.y + 20);
+				break;
+			case 5:
+				ctx.fillStyle = shopColors[2];
+				ctx.fillText('★★★★', this.x + 30, this.y + 20);
+				ctx.fillStyle = shopColors[3];
+				ctx.fillText('★★★★', this.x + 90, this.y + 20);
+				break;
+			case 6:
+				ctx.fillStyle = shopColors[1];
+				ctx.fillText('★★★', this.x + 20, this.y + 20);
+				ctx.fillStyle = shopColors[2];
+				ctx.fillText('★★★', this.x + 60, this.y + 20);
+				ctx.fillStyle = shopColors[3];
+				ctx.fillText('★★★', this.x + 100, this.y + 20);
+				break;
+			case 7:
+				ctx.fillStyle = "white";
+				ctx.fillText('5 bouquets', this.x + 60, this.y + 20);
+				break;
+		}
 			// fill achievement rewards
+		if (!this.claimed) {
 			ctx.fillStyle = "white";
-			ctx.fillText('Get:', this.x + 12, this.y + 40)
+			ctx.fillText('Get:', this.x + 20, this.y + 40)
 			switch(this.type) {
 				case 0:
 					ctx.fillStyle = shopColors[2];
-					ctx.fillText('★', this.x + 40, this.y + 40);
+					//ctx.fillText('★', this.x + 50, this.y + 40);
 					ctx.fillStyle = shopColors[3];
-					ctx.fillText('★', this.x + 50, this.y + 40);
+					//ctx.fillText('★', this.x + 60, this.y + 40);
 					ctx.fillStyle = "white";
-					ctx.fillText('2VP', this.x + 70, this.y + 40);
+					ctx.fillText('3VP', this.x + 80, this.y + 40);
 					break;
 				case 1:
 					ctx.fillStyle = shopColors[1];
-					ctx.fillText('★', this.x + 40, this.y + 40);
+					//ctx.fillText('★', this.x + 50, this.y + 40);
 					ctx.fillStyle = shopColors[3];
-					ctx.fillText('★', this.x + 50, this.y + 40);
+					//ctx.fillText('★', this.x + 60, this.y + 40);
 					ctx.fillStyle = "white";
-					ctx.fillText('2VP', this.x + 70, this.y + 40);
+					ctx.fillText('3VP', this.x + 80, this.y + 40);
 					break;
 				case 2:
 					ctx.fillStyle = shopColors[1];
-					ctx.fillText('★', this.x + 40, this.y + 40);
+					//ctx.fillText('★', this.x + 50, this.y + 40);
 					ctx.fillStyle = shopColors[2];
-					ctx.fillText('★', this.x + 50, this.y + 40);
+					//ctx.fillText('★', this.x + 60, this.y + 40);
 					ctx.fillStyle = "white";
-					ctx.fillText('2VP', this.x + 70, this.y + 40);
+					ctx.fillText('3VP', this.x + 80, this.y + 40);
 					break;
 				case 3:
 					ctx.fillStyle = shopColors[3];
-					ctx.fillText('★★', this.x + 40, this.y + 40);
+					//ctx.fillText('★★', this.x + 50, this.y + 40);
 					ctx.fillStyle = "white";
-					ctx.fillText('1VP $2', this.x + 80, this.y + 40);
+					ctx.fillText('2VP $2', this.x + 90, this.y + 40);
 					break;
 				case 4:
 					ctx.fillStyle = shopColors[2];
-					ctx.fillText('★★', this.x + 40, this.y + 40);
+					//ctx.fillText('★★', this.x + 50, this.y + 40);
 					ctx.fillStyle = "white";
-					ctx.fillText('1VP $2', this.x + 80, this.y + 40);
+					ctx.fillText('2VP $2', this.x + 90, this.y + 40);
 					break;
 				case 5:
 					ctx.fillStyle = shopColors[1];
-					ctx.fillText('★★', this.x + 40, this.y + 40);
+					//ctx.fillText('★★', this.x + 50, this.y + 40);
 					ctx.fillStyle = "white";
-					ctx.fillText('1VP $2', this.x + 80, this.y + 40);
+					ctx.fillText('2VP $2', this.x + 90, this.y + 40);
 					break;
 				case 6:
 					ctx.fillStyle = shopColors[1];
@@ -278,13 +282,19 @@ function achievementCard (type, x, y) {
 					ctx.fillStyle = shopColors[3];
 					ctx.fillText('★', this.x + 60, this.y + 40);
 					ctx.fillStyle = "white";
-					ctx.fillText('$2', this.x + 80, this.y + 40);
+					ctx.fillText('$1', this.x + 80, this.y + 40);
 					break;
 				case 7:
 					ctx.fillStyle = "white";
 					ctx.fillText('3 VP', this.x + 60, this.y + 40);
 					break;
 			}
+		}
+		else {
+			ctx.fillStyle = players[this.claimer].color;
+			ctx.fillRect(this.x + 10, this.y + 30, 10, 10);
+			ctx.fillStyle = "white";
+			ctx.fillText (players[this.claimer].username, this.x + 60, this.y + 40);
 		}
 	}
 }

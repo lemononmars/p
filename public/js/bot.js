@@ -27,8 +27,12 @@ function botAction(id) {
 						}
 					break;
 				case 4: // library
-					// *todo : add a clever way to draw a card
-					indexBest = ran(shops[activeShop].length);
+					// *todo : add a clever way to draw a card (weigh)
+					// for now, grab the one easiest to accomplish
+					for (i = 0; i < shops[activeShop].length; i ++) {
+						if (shops[activeShop][i].object.quality < shops[activeShop][indexBest].object.quality)
+							indexBest = i;
+					}
 					break;
 				default:
 						break;

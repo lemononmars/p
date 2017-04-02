@@ -199,6 +199,10 @@ io.on('connection', function(socket){
   })
 
   socket.on('game end', function() {
-
+    io.in(socket.room).emit('game finished');
+    delete gameRooms[socket.room];
+    io.emit('room deleted', {
+        roomId : socket.room
+    });
   });
 });
