@@ -65,18 +65,19 @@
 				</div>
 			</div>
 
-			<div id = "game_board" hidden></div>
 			<div id = "chat_box" class="chat_box" hidden>
 				<div id = "chat_messages" class = "chat_messages">
 					<ul></ul>
 				</div>
 				<div id = "chat_input_area" class="chat_input_area">
 					<form action="javascript:void(0)" class="chat_form">
-						<input id = "chat_input" class="chat_input" autocomplete = "off"/> 
-						<button id = "chat_input_button" onClick = "">Send</button>
-						<button class = "chat_toggle_button" style = "float:right">hide</button>
-						<button class = "chat_toggle_button" style = "float:right" hidden> show </button>
+						<input id = "chat_input" class = "chat_input" autocomplete = "off"/> 
+						<button class = "chat_input_button" onClick = "">Send</button>
 					</form>
+				</div>
+				<div id = 'chat_right' class = "chat_right">
+					<button class = "chat_toggle_button">hide chat</button>
+					<button class = "chat_toggle_button" hidden> show chat</button>
 				</div>
 			</div>
 
@@ -84,12 +85,109 @@
 				Game log :
 				<button class = "gamelog_button"> hide </button>
 				<button class = "gamelog_button" hidden> show </button>
-				Auto play :
-				<button class = "autoplay_button"> On </button>
-				<button class = "autoplay_button" hidden> Off </button><br>
 				<div id = "gamelog"></div>
 			</div>
 		</div>
+
+		<div id = "game_board" hidden>
+			<div id = "opponent_board_area"></div>
+			<div id = "game_info">
+				<div id = "tie_break_track"></div>
+				<div id = "score_track"></div>
+			</div>
+			<div id = "main_board">
+				<table class = "main_board_table">
+					<tbody>
+						<tr id = "goods">
+							<td id = "goods1" class = "goods" lenght = '10%'></td>
+							<td id = "goods2" class = "goods" lenght = '10%'></td>
+							<td id = "goods3" class = "goods" lenght = '10%'></td>
+							<td id = "goods4" class = "goods" lenght = '10%'></td>
+							<td id = "goods5" class = "goods" lenght = '10%'></td>
+							<td id = "goods6" class = "goods" lenght = '10%'></td>
+						</tr>
+						<tr id = "shops">
+							<td id = "shop1" class = "shop">
+								<img src = "img/shop1.jpg" class = "shop_image"></img>
+							</td>
+							<td id = "shop2" class = "shop">
+								<img src = "img/shop2.jpg" class = "shop_image"></img>
+							</td>
+							<td id = "shop3" class = "shop">
+								<img src = "img/shop3.jpg" class = "shop_image"></img>
+							</td>
+							<td id = "shop4" class = "shop">
+								<img src = "img/shop4.jpg" class = "shop_image"></img>
+							</td>
+							<td id = "shop5" class = "shop">
+								<img src = "img/shop5.jpg" class = "shop_image"></img>
+							</td>
+							<td id = "shop6" class = "shop">
+								<img src = "img/shop6.jpg" class = "shop_image"></img>
+							</td>
+						</tr>
+						<tr id = "timetokenarea">
+							<td id = "timetokenarea1" class = "time_token_area"></td>
+							<td id = "timetokenarea2" class = "time_token_area"></td>
+							<td id = "timetokenarea3" class = "time_token_area"></td>
+							<td id = "timetokenarea4" class = "time_token_area"></td>
+							<td id = "timetokenarea5" class = "time_token_area"></td>
+							<td id = "timetokenarea6" class = "time_token_area"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div id = "my_area">
+				<div id = "my_board_area">
+					<div id = "my_board" class = "player_board">
+						<div id = "my_left_board">
+							<table class = "my_left_board_table">
+								<tbody>
+									<tr>
+										<td id = "my_name" class = "player_name" colspan = "6"></td>
+									</tr>
+									<tr>
+										<td id = "my_money" colspan = "3"></td>
+										<td id = "my_score" colspan = "3"></td>
+									</tr>
+									<tr>
+										<td id = "my_ribbon" colspan = "3"></td>
+										<td id = "my_action_cube" colspan = "3"></td>
+									</tr>
+									<tr class = "player_bonus_icon">
+										<td id = "bonus_icon1" colspan = "2"></td>
+										<td id = "bonus_icon2" colspan = "2"></td>
+										<td id = "bonus_icon3" colspan = "2"></td>
+									</tr>
+									<tr class = "player_bonus">
+										<td id = "my_bonus1" colspan = "2"></td>
+										<td id = "my_bonus2" colspan = "2"></td>
+										<td id = "my_bonus3" colspan = "2"></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div id = "my_right_board">
+							<table class = "my_right_board_table">
+								<tbody>
+									<tr>
+										<td id = "my_time_track" class = "player_time_track"></td>
+									</tr>
+									<tr>
+										<td id = "my_hand" class = "player_hand"></td>
+									</tr>
+									<tr>
+										<td id = "my_vase" class = "player_vase"></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div id = "button_area"></div>
+				</div>
+			</div>
+		</div>
+
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
 		<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 		<!-- server side -->

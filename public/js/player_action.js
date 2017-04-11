@@ -31,18 +31,24 @@ function takeAction(id, location, index) {
         // get an action cube if you pass during buy phase
         if (phase == 2)
     		players[id].actionCubes ++;
-        currentPlayer = nextPlayer();	// *todo - ping next player
+
+        nextPlayer();	// *todo - ping next player
+		players[id].update();
 		return true;
 	}
 
 	switch(location) {
 		case 0:
-			players[id].money += shops[0][index].object;
-			addLog(players[id].username + " gains $" + shops[0][index].object, id);
+			players[id].money += shops[0][index];
+			addLog(players[id].username + " gains $" + shops[0][index], id);
+			// remove the component from the board
+			$('#goods1').children()
+				.eq(index)
+				.remove();
 			shops[0].splice(index, 1);
 			break;
 		case 1: case 2: case 3:
-			if (players[id].money < 1) {
+			if (players[id].money < 1 && !buyFlowerToolToken) {
 				addLog(">> Not enough money");
 				return false;
 			}
@@ -53,12 +59,16 @@ function takeAction(id, location, index) {
 			}
 			else {
 				addLog(players[id].username + " buys a " + shopList[location], id);
-				players[id].getFlowerToken(shops[location][index].object);
-				if (!buyFlowerToolToken)
-					players[id].money -= 1;
+				players[id].getFlowerToken(
+					shops[location][index], 
+					$('.goods').eq(location).children().eq(index)
+				);
 				shops[location].splice(index, 1);
-                if(buyFlowerToolToken)
-                    buyFlowerToolToken = false;
+
+				if (buyFlowerToolToken)
+					buyFlowerToolToken = false;
+                else
+                    players[id].money -= 1;
 			}
 			break;
 		case 4:
@@ -69,21 +79,26 @@ function takeAction(id, location, index) {
 			}
 			else {
 				addLog(players[id].username + " draws a card.", id);
-				players[id].drawFlowerCard(shops[4][index].object);
+				players[id].drawFlowerCard(
+					shops[4][index],
+					$('.goods').eq(4).children().eq(index)
+				);
 				shops[4].splice(index, 1);
 			}
 			break;
 		case 5:
-			if (players[id].money < shops[5][index].object.getCost()) {
+			if (players[id].money < shops[5][index].getCost()) {
 				addLog("Not enough money");
 				return false;
 			}
-			addLog(players[id].username + " buys " + shops[5][index].object.toString(), id);
-			players[id].getToolToken(shops[5][index].object);
-			players[id].money -= shops[5][index].object.getCost();
-			shops[5][index].object.levelDown(1);
-			shops[5][index].newText(shops[5][index].object.toSymbol());
-			$toolLevels[index].newText(shops[5][index].object.getLevelBar());
+			addLog(players[id].username + " buys " + shops[5][index].toString(), id);
+			players[id].getToolToken(shops[5][index]);
+			players[id].money -= shops[5][index].getCost();
+			shops[5][index].levelDown(1);
+			$('#goods6 img')
+				.filter(function() {return $(this).val() == index;})
+				.attr('src', 'img/tool' + index + 'lv' + shops[5][index].level + '.jpg' );
+
 			break;
 		default:	// invalid location
 			addLog("What are you doing?", id);
@@ -96,7 +111,9 @@ function takeAction(id, location, index) {
 		players[id].actionCubes -= 2;
 
     if (!buyFlowerToolToken)
-        currentPlayer = nextPlayer();
+        nextPlayer();
 
+	// update displayed information
+	players[id].update();
 	return true;
 }

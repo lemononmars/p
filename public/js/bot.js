@@ -5,32 +5,38 @@ function botAction(id) {
 		playerAction(id, 0, -1)
 	}
 	else if(phase == 2) {
-		if (shops[activeShop].length === 0) {
+		if ( $('.goods').eq(activeShop).children().length == 0 ) {
 			playerAction(id, activeShop, -1);
 		}
 		else {
 			var indexBest = 0;
+			var l = shops[activeShop].length;
 			switch(activeShop) {
 				case 0: // restaurant
-					for (i = 0; i < shops[activeShop].length; i ++)
-						if (shops[activeShop][indexBest].object < shops[activeShop][i].object) 
+					for (i = 0; i < l; i ++)
+						if (shops[0][i] > shops[0][indexBest]) 
 							indexBest = i;
 					break;
 				case 1: case 2: case 3:	// flower shop
 					// don't buy the token if you already have enough
 					if (!needFlowerTokens(id, activeShop-1))
 						indexBest = -1;
-					else
-						for (i = 0; i < shops[activeShop].length; i ++) {
-							if (shops[activeShop][indexBest].object.quality < shops[activeShop][i].object.quality)
-									indexBest = i;
+					else {
+						for (i = 0; i < l; i ++) {
+							var best = shops[activeShop][indexBest].quality;
+							var current = shops[activeShop][i].quality
+							if (current > best)
+								indexBest = i;
 						}
+					}
 					break;
 				case 4: // library
-					// *todo : add a clever way to draw a card (weigh)
-					// for now, grab the one easiest to accomplish
-					for (i = 0; i < shops[activeShop].length; i ++) {
-						if (shops[activeShop][i].object.quality < shops[activeShop][indexBest].object.quality)
+					for (i = 0; i < l; i ++) {
+						var best = shops[4][indexBest].quality;
+						var current = shops[4][i].quality;
+						// here, we want to draw the (subjectively) easiest card to arrange 
+						// *todo : add a clever way to draw a card (weigh)
+						if (current < best)
 							indexBest = i;
 					}
 					break;
@@ -51,7 +57,7 @@ function botAction(id) {
 						&& players[id].money >= 3)
 					indexBest = 1;
 				// then see if you want some ribbons
-				else if (players[id].numRibbons <= 2 && players[id].money >= shops[5][2].object.cost + 1)
+				else if (players[id].numRibbons <= 2 && players[id].money >= shops[5][2].cost + 1)
 					indexBest = 2;
 				// *todo - determine if bot wants extra flower
 				// if all fails, just pass.....
@@ -69,12 +75,12 @@ function botArrangeFlower(id) {
 		return false;
 
 	for (i = 0; i < players[id].hand.length; i ++) {
-		var requiredFlowers = players[id].hand[i].object.getFlowers();
-		var requiredTotal = players[id].hand[i].object.quality;
+		var requiredFlowers = players[id].hand[i].getFlowers();
+		var requiredTotal = players[id].hand[i].quality;
 		var flowers = [[],[],[]];
 		for (j = 0; j < players[id].vases.length; j ++)
-			flowers[players[id].vases[j].object.type].push(
-				[j, players[id].vases[j].object.quality]
+			flowers[players[id].vases[j].type].push(
+				[j, players[id].vases[j].quality]
 			); // push (index of the token in the vase, quality of that token)
 		
  		if (flowers[0].length >= requiredFlowers[0] && 
@@ -163,10 +169,10 @@ function botChooseTimeTokens(id) {
 // 	simply compare how many the first card requires and how many you have
 function needFlowerTokens (id, i) {
 	if (players[id].hand.length > 0) {
-		var want = players[id].hand[0].object.getFlowers()[i];
+		var want = players[id].hand[0].getFlowers()[i];
 		var have = 0;
 		for (const token of players[id].vases) {
-			if (token.object.type == i)
+			if (token.type == i)
 				have ++;
 		}
 		return want > have;	// true if you want more than you have

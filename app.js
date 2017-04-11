@@ -34,13 +34,8 @@ io.on('connection', function(socket){
 
   // check if the username has been claimed already
   socket.on('check username', function(data) {
-    var dupe = false;
-    for (name in onlineUsers) {
-      if (name == data)
-        dupe = true;
-    }
     socket.emit('username checked', {
-      dupe : dupe
+      dupe : (data in onlineUsers)
     });
   });
 
@@ -57,6 +52,10 @@ io.on('connection', function(socket){
       list : onlineUsers
     });
 
+    io.emit('chat message added', {
+      user : username + ' has logged in',
+      message : ''
+    });
     for (r in gameRooms) {
       socket.emit('room created', {
         roomId : r,
@@ -66,7 +65,7 @@ io.on('connection', function(socket){
   });
 
   // disconnect a user
-  socket.on('disconnect', function(data){
+  socket.on('disconnect', function(){
     if (addedUser) {
       delete onlineUsers[socket.username];
       addedUser = false;
@@ -130,8 +129,11 @@ io.on('connection', function(socket){
   });
 
   // add a chat message
-  socket.on('chat message', function(msg){
-    io.emit('chat message', msg);
+  socket.on('add chat message', function(data){
+    io.emit('chat message added', {
+      message : data,
+      user : socket.username
+    });
   });
 
   // game sutaato !
@@ -167,7 +169,9 @@ io.on('connection', function(socket){
     socket.room = -1;
   });
 
-  // socket for in game stuff
+  /*
+   * socket for in game stuff
+   */
 
   socket.on('give starting stuff', function(data) {
     io.in(socket.room).emit('starting stuff recieved', data);

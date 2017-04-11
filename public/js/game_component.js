@@ -5,10 +5,11 @@
 //	score		: score gained once finished
 ///////////////////////////////////////////////////////////////////////////////////
 
-function flowerCard(f0, f1, f2, quality, score) {
+function flowerCard(f0, f1, f2, quality, score, level) {
 	this.flowers = new Array(f0, f1, f2); 	// required flowers
 	this.quality = quality;
 	this.score = score;					// base score
+	this.level = level;					// difficulty
 
 	// check if the player can arrange this flower card
 	this.verify = function(flowerTokens, numRibbons, qualBonus) {
@@ -51,28 +52,6 @@ function flowerCard(f0, f1, f2, quality, score) {
 	this.getRewards = function () {
 		return this.rewards;
 	};
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-// 							add extra text on components								//
-///////////////////////////////////////////////////////////////////////////////////////////
-
-// add text on a card
-function fillCard(width, height, x, y, card) {
-	ctx = myGameArea.context;
-	ctx.font = "15px Arial";
-	ctx.textAlign = "center";
-	ctx.fillStyle = shopColors[1];
-	var f = card.getFlowers();
-	for (k = 0; k < 3; k ++) {
-		ctx.fillStyle = shopColors[k+1];
-		ctx.fillText(f[k],					x + (2*k+1)*width/6, y+15);
-		ctx.fillText("*", 					x + (2*k+1)*width/6, y+15+ height/4);
-	}
-	ctx.fillStyle = "white";
-	ctx.font = "10px Cordia";
-	ctx.fillText("Qual:" + card.quality, x + 3*width/6, y+10 + 2*height/4);
-	ctx.fillText("Score:" + card.score, x + 3*width/6, y+10 + 3*height/4);
 }
 
 //  info of flower token
