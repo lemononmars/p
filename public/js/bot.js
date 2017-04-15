@@ -46,14 +46,14 @@ function botAction(id) {
 			// *todo - use different strategy for each type of bots 
 			// e.g. switching if statement ordering
 			if (activeShop == 5) {
-				// get ahead on tie break track first
-				if (tieBreak.indexOf(id) >= numPlayers - 2)
+				// get ahead on tie break track if you're last two
+				if (tieBreak.indexOf(Number(id)) >= numPlayers - 2)
 					indexBest = 4;
 				// then try to get a clock upgrade
 				else if (players[id].time <= 2 && players[id].money >= 6)
 					indexBest = 0;
-				// then try to expand your vases
-				else if ((players[id].numVases <= 4 || players[id].numVases >= players[id].vases.length)
+				// then try to get more vases
+				else if ((players[id].numVases <= 4 || players[id].numVases == players[id].vases.length)
 						&& players[id].money >= 3)
 					indexBest = 1;
 				// then see if you want some ribbons
@@ -62,7 +62,7 @@ function botAction(id) {
 				// *todo - determine if bot wants extra flower
 				// if all fails, just pass.....
 				else
-					indexBest = -1;
+					indexBest = 4;
 			}
 			if(!playerAction(id, activeShop, indexBest))
 				playerAction(id, activeShop, -1);

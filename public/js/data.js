@@ -21,11 +21,11 @@ var toolAmount = [	[1, 2, 2],
 					[1, 1, 1],
 					[1, 1, 1]];
 
-var toolSymbol = [	['Ø', 'ØØ', 'ØØ'], 
-					['Ÿ', 'Ÿ', 'ŸŸ'], 
-					['œ', 'œœ', 'œœ'], 
-					['✿', '✿', '✿'],
-					['«', '«', '«']];
+var toolString = [	['a clock', 'two clocks', 'two clocks'], 
+					['a vase', 'a vase', 'two vases'], 
+					['a ribbon', 'two ribbons', 'two ribbons'], 
+					['a flower', 'a flower', 'a flower'],
+					['First in Tie Break', 'First in Tie Break', 'First in Tie Break']];
 
 var achievementSymbol = [0,1,2,3,4,5,6,7];
 
@@ -37,7 +37,7 @@ var achievementString = [	'6 pink', '6 blue', '6 white',
 // [pink, blue, white, score, money]
 var achievementRewards = [	[0,0,0,3,0], [0,0,0,3,0], [0,0,0,3,0],
 							[0,0,0,2,2], [0,0,0,2,2], [0,0,0,2,2],
-							[1,1,1,0,1],
+							[1,1,1,0,2],
 							[0,0,0,3,0]];
 
 var achievementRewardString = [ 	'blue + white + 2 VP', 'pink + white + 2 VP', 'blue + pink + 2 VP',
@@ -71,12 +71,14 @@ function getRandomFlowerCard() {
 						[[2,2,0], [2,0,2], [0,2,2], [2,1,1], [1,2,1], [1,1,2]],	
 						[[2,2,1], [2,1,2], [1,2,2]]	
 					];	// number of flowers [ [1], [2], [3], [4], [5] ]
-	var c = randomWithWeight([1, 6, 6, 3, 0]);
+	var c = randomWithWeight([2, 6, 6, 3, 0]);	// remove 5 flower-card because the icons don't fit....
 	var a = allCards[c][ran(allCards[c].length)];
 	var l = randomWithWeight([3, 2, 1]);
 
-	var qual = Math.ceil((a[0] + a[1] + a[2]) * 2.5) + l * 3;  
-	return [a[0], a[1], a[2], qual, (a[0] + a[1] + a[2] -1 ) * 2 + l * 2]; // score = 1 + 2*(total-1) + 2*level
+	var total = a[0] + a[1] + a[2];
+	var qual = Math.ceil(total * 2.5) + l * 3; 
+	var score = ( total - 1 ) * 2 + l * 2;
+	return [a[0], a[1], a[2], qual, score]; // score = 1 + 2*(total-1) + 2*level
 }
 
 // return array of length 5 where a[i] = # tools drawn for tool of type i

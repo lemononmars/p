@@ -91,12 +91,8 @@ function toolToken(type) {
 		this.level = Math.min(2, this.level + l);
 	}
 
-	this.toSymbol = function() {
-		return toolSymbol[this.type][this.level] + '\n $' + toolCost[this.type][this.level];
-	};
-
 	this.toString = function() {
-		return toolSymbol[this.type][this.level] + ' for ' + toolCost[this.type][this.level];
+		return toolString[this.type][this.level] + ' for ฿' + toolCost[this.type][this.level];
 	};
 
 	
@@ -108,10 +104,10 @@ function timeToken(id, value) {
 	this.value = value;
 }
 
-function achievementCard (type, x, y) {
+function achievementCard (type, $card) {
 	this.type = type;
-	this.x = x;
-	this.y = y;
+	this.$card = $card;
+
 	this.claimed = false;
 	this.claimer = 0;
 
@@ -149,8 +145,10 @@ function achievementCard (type, x, y) {
 			default:
 				break;
 		}
-		if (this.claimed)
+		if (this.claimed) {
 			this.claimer = id;
+			$(this.$card).addClass('achievement_card--claimed');
+		}
 		return this.claimed;
 	};
 
@@ -161,119 +159,4 @@ function achievementCard (type, x, y) {
 	this.getRewards = function() {
 		return achievementRewards[this.type];
 	};
-
-	this.update = function() {
-		ctx = myGameArea.context;
-		ctx.fillStyle = "brown";
-		ctx.fillRect(this.x, this.y, 120, 50);
-		ctx.font = "15px";
-		ctx.textAlign = "center";
-		// fill achievement's requirement
-		
-		switch(this.type) {
-			case 0: case 1: case 2:
-				ctx.fillStyle = shopColors[this.type + 1];
-				ctx.fillText('★★★★★★', this.x + 60, this.y + 20);
-				break;
-			case 3:
-				ctx.fillStyle = shopColors[1];
-				ctx.fillText('★★★★', this.x + 30, this.y + 20);
-				ctx.fillStyle = shopColors[2];
-				ctx.fillText('★★★★', this.x + 90, this.y + 20);
-				break;
-			case 4:
-				ctx.fillStyle = shopColors[1];
-				ctx.fillText('★★★★', this.x + 30, this.y + 20);
-				ctx.fillStyle = shopColors[3];
-				ctx.fillText('★★★★', this.x + 90, this.y + 20);
-				break;
-			case 5:
-				ctx.fillStyle = shopColors[2];
-				ctx.fillText('★★★★', this.x + 30, this.y + 20);
-				ctx.fillStyle = shopColors[3];
-				ctx.fillText('★★★★', this.x + 90, this.y + 20);
-				break;
-			case 6:
-				ctx.fillStyle = shopColors[1];
-				ctx.fillText('★★★', this.x + 20, this.y + 20);
-				ctx.fillStyle = shopColors[2];
-				ctx.fillText('★★★', this.x + 60, this.y + 20);
-				ctx.fillStyle = shopColors[3];
-				ctx.fillText('★★★', this.x + 100, this.y + 20);
-				break;
-			case 7:
-				ctx.fillStyle = "white";
-				ctx.fillText('5 bouquets', this.x + 60, this.y + 20);
-				break;
-		}
-			// fill achievement rewards
-		if (!this.claimed) {
-			ctx.fillStyle = "white";
-			ctx.fillText('Get:', this.x + 20, this.y + 40)
-			switch(this.type) {
-				case 0:
-					ctx.fillStyle = shopColors[2];
-					//ctx.fillText('★', this.x + 50, this.y + 40);
-					ctx.fillStyle = shopColors[3];
-					//ctx.fillText('★', this.x + 60, this.y + 40);
-					ctx.fillStyle = "white";
-					ctx.fillText('3VP', this.x + 80, this.y + 40);
-					break;
-				case 1:
-					ctx.fillStyle = shopColors[1];
-					//ctx.fillText('★', this.x + 50, this.y + 40);
-					ctx.fillStyle = shopColors[3];
-					//ctx.fillText('★', this.x + 60, this.y + 40);
-					ctx.fillStyle = "white";
-					ctx.fillText('3VP', this.x + 80, this.y + 40);
-					break;
-				case 2:
-					ctx.fillStyle = shopColors[1];
-					//ctx.fillText('★', this.x + 50, this.y + 40);
-					ctx.fillStyle = shopColors[2];
-					//ctx.fillText('★', this.x + 60, this.y + 40);
-					ctx.fillStyle = "white";
-					ctx.fillText('3VP', this.x + 80, this.y + 40);
-					break;
-				case 3:
-					ctx.fillStyle = shopColors[3];
-					//ctx.fillText('★★', this.x + 50, this.y + 40);
-					ctx.fillStyle = "white";
-					ctx.fillText('2VP $2', this.x + 90, this.y + 40);
-					break;
-				case 4:
-					ctx.fillStyle = shopColors[2];
-					//ctx.fillText('★★', this.x + 50, this.y + 40);
-					ctx.fillStyle = "white";
-					ctx.fillText('2VP $2', this.x + 90, this.y + 40);
-					break;
-				case 5:
-					ctx.fillStyle = shopColors[1];
-					//ctx.fillText('★★', this.x + 50, this.y + 40);
-					ctx.fillStyle = "white";
-					ctx.fillText('2VP $2', this.x + 90, this.y + 40);
-					break;
-				case 6:
-					ctx.fillStyle = shopColors[1];
-					ctx.fillText('★', this.x + 40, this.y + 40);
-					ctx.fillStyle = shopColors[2];
-					ctx.fillText('★', this.x + 50, this.y + 40);
-					ctx.fillStyle = shopColors[3];
-					ctx.fillText('★', this.x + 60, this.y + 40);
-					ctx.fillStyle = "white";
-					ctx.fillText('$1', this.x + 80, this.y + 40);
-					break;
-				case 7:
-					ctx.fillStyle = "white";
-					ctx.fillText('3 VP', this.x + 60, this.y + 40);
-					break;
-			}
-		}
-		else {
-			ctx.fillStyle = players[this.claimer].color;
-			ctx.fillRect(this.x + 10, this.y + 30, 10, 10);
-			ctx.fillStyle = "white";
-			ctx.fillText (players[this.claimer].username, this.x + 60, this.y + 40);
-		}
-	}
 }

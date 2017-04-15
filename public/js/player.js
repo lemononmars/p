@@ -53,6 +53,7 @@ function player(id, username, color, bot) {
     // get a flower token and add it to your vase
 	this.getFlowerToken = function(ftoken, $ftoken) {
 		this.vases.push(ftoken);
+		$($ftoken).fadeIn("slow");
 		if (this.id != myID)
 			$($ftoken).addClass('small_icon');
 		$(this.myBoard)
@@ -91,9 +92,10 @@ function player(id, username, color, bot) {
 		switch(toolToken.type) { // refer to toolToken
 			case 0:	
 				this.time += toolToken.getAmount();
+				this.score += toolToken.getAmount();
 				if(this.time > 6) 
 					this.time = 6;
-				this.score += toolToken.getAmount();
+
 				$(this.myBoard).find('#my_time_track').empty();
 				$(this.myBoard).find('#my_time_track').append(
 					$('<img/>').attr('src','img/time_track' + this.time + '.png')
@@ -102,12 +104,13 @@ function player(id, username, color, bot) {
 				break;
 			case 1:
 				var newVases = toolToken.getAmount();
-				var $v = $('<img/>').attr('src', 'img/empty_vase.png')
-								.addClass('empty_vase');
-				if (this.id != myID)
-					$($v).addClass('small_icon');
 				// cap at 6 vases
 				if (this.numVases < 6) {
+					var $v = $('<img/>').attr('src', 'img/empty_vase.png')
+								.addClass('empty_vase')
+								.fadeIn("slow");
+					if (this.id != myID)
+						$($v).addClass('small_icon');
 					this.numVases ++;
 					$(this.myBoard)
 						.find('.player_vase')
@@ -115,6 +118,10 @@ function player(id, username, color, bot) {
 				}
 				if (newVases == 2 && this.numVases < 6) {
 					this.numVases ++;
+					var $v = $('<img/>').attr('src', 'img/empty_vase.png')
+								.addClass('empty_vase');
+					if (this.id != myID)
+						$($v).addClass('small_icon');
 					$(this.myBoard)
 						.find('.player_vase')
 						.prepend($v);
@@ -155,7 +162,7 @@ function player(id, username, color, bot) {
 	// because we assume eligibility was already checked, we don't check it again here
 	this.arrangeFlower = function(cardIndex, tokenIndices, ribbonsUsed) {
 		// update rewards
-		var s = this.hand[cardIndex].getFlowersAt(this.bonus.indexOf(2)) + this.hand[cardIndex].score;
+		var s = this.getBonus(2) + this.hand[cardIndex].score; // score = card score + score bonus
 		this.score += s;
 		for (i = 0; i < 3; i ++)
 			this.stars[i] += this.hand[cardIndex].getFlowersAt(i);
@@ -164,7 +171,7 @@ function player(id, username, color, bot) {
 
 		// add log
 		addLog(this.username + " arranges a bouquet ~", this.id);
-		addLog("...." + this.username + " gains $" + this.stars[this.bonus[1]], this.id);
+		addLog("...." + this.username + " gains ฿" + this.stars[this.bonus[1]], this.id);
 		addLog("...." + this.username + " gets " + s + " points", this.id);
 
 		// spend resources

@@ -213,5 +213,9 @@ io.on('connection', function(socket){
       text: data.gameinfo
     });
    
+   socket.on('toggle autoplay', function(data) {
+     io.in(socket.room).emit('autoplay toggled', data);
+   });
+
   });
 });

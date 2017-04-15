@@ -19,19 +19,21 @@ var currentPlayer;		// who is playing
 var myusername;			
 var myID;
 var gameID;
+var achievements;		// component for achievements
 var selectedFlowerCard;	// card currently selected (arranging phase)
 var startingMoney = 5;
 var handLimit = 4;
 var tutorial = true;	// on: detailed description of each phase is displayed in log
 var isDone = false;		// check if you finish and are waiting for other players
 
-var ctx;				// pointed to the canvas
 var shops; 				// list of goods components displaying in each shop
 var activeShop;			// which shop is opening now (buy phase):
 var activeTokenOrder;	// which token in the shop is taking an action
 var tieBreak;			// determine who buys first in case of tie
 
-var $achievements;		// component for achievements
+// cosmetic
+var blink;
+var titleBlink = false;				// blinking title when it's your turn
 
 //////////////////////////////////////////////////////////////////////////////////////
 // add a player after username is submitted and display waiting room
@@ -63,16 +65,23 @@ function startGame(data) {
 	tieBreak = [];
 	// only let one player sends the server an inquiry
 	if (myID == 0) {
+		// random starting bonus
 		var bonus = [0,1,2,3,4,5];
       	shuffle(bonus);
 		for (i = 0; i < numPlayers; i ++) 
 			tieBreak.push(i);
 		shuffle(tieBreak);
 
+		// random achievements
+        var temp = [0,1,2,3,4,5,6,7];
+        shuffle(temp);
+        var achieve = temp.splice(0, numPlayers);
+
 		socket.emit('give starting stuff', {
 			flowerCards : generateStartingFlowerCards(),
 			bonuses : bonus,
-			tieBreak: tieBreak
+			tieBreak: tieBreak,
+			achieve: achieve
 		})
 
 		socket.emit('generate market', generateGoods(numPlayers));
@@ -164,8 +173,10 @@ function goFirst(id) {
 	var t = tieBreak.indexOf(Number(id));
 	tieBreak.splice(t, 1);
 	tieBreak.unshift(Number(id));
+	$('.tie_break_token').eq(t).fadeOut();
 	if (t > 0)
 		$('.tie_break_token').eq(0).before( $('.tie_break_token').eq(t) );
+	$('.tie_break_token').eq(0).fadeIn();
 }
 
 // find the next player
@@ -225,6 +236,26 @@ function nextPlayer () {
 	}
 
 	currentPlayer = nextP;
+	// make the title blink to remind the player's turn
+	if (nextP >= 0)
+		$('.status_bar--text').text(players[nextP].username + "'turn")
+			.css('background-color', players[nextP].color);
+	if (nextP == myID) {
+		$('#status_bar').addClass('active');
+		blink = setInterval(function() {
+			document.title = (titleBlink) ? '!! Your Turn !!' : 'Pakklong Talat';
+			var link = (titleBlink) ? 'img/title_icon_blink.png' : 'img/title_icon.png';
+			$('link[rel="icon"]').attr('href', link);
+			titleBlink = !titleBlink;
+		}, 700);
+	}
+	else {
+		$('#status_bar').removeClass('active');
+		clearInterval(blink);
+		titleBlink = false;
+		document.title = 'Pakklong Talat';
+	}
+
 	// if the next player is a bot, let it take some action
 	if (nextP >= 0 && myID == 0 && players[nextP].isBot) {
 		botAction(nextP);
@@ -232,9 +263,9 @@ function nextPlayer () {
 }
 
 function getActiveTimeToken() {
-	return $('.time_token_area')
-			.eq(activeShop).children('.time_token')
-			.eq(activeTokenOrder).val();
+	return $('.time_token_area').eq(activeShop)
+			.children('.time_token').eq(activeTokenOrder)
+			.val();
 }
 
 // game end when one of the following conditions is met

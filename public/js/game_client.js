@@ -7,16 +7,23 @@ $(document).ready(function(){
      */
 
 	$('.gamelog_button').click(function(){
-		$('#gamelog').toggle();
+		$('#gamelog').height( 500 - $('#gamelog').height() );
 		$('.gamelog_button').toggle();
     });
 
+    $(document).on('click', '.button--expand_achievement', function () {
+        $('#achievement_area--large').toggle();
+    });
     // testing purpose only !
 
     $(document).on('click', '.autoplay_button', function() {
         $('.autoplay_button').toggle();
         players[myID].isBot = !players[myID].isBot;
         autoplay = !autoplay;
+        socket.emit('toggle autoplay', {
+            id : myID,
+            newStatus: players[myID].isBot
+        });
     });
 
     $(document).on('click', '.random_button', function() {
@@ -32,7 +39,8 @@ $(document).ready(function(){
     // end testing section
 
     $(document).on('click', '.money', function() {
-        if (currentPlayer == myID && (activeShop == 0 || phase == 0 || phase == 3)) {
+        if (currentPlayer == myID 
+                && (activeShop == 0 || phase == 0 || phase == 3)) {
             var index = $('#goods1').children().index( this );
             playerAction(myID, 0, index);
         }
@@ -40,23 +48,31 @@ $(document).ready(function(){
 
     $(document).on('click', '.flower_token', function() {
         var type = $(this).data('type');
-        if (currentPlayer == myID && 
-            (activeShop == type || buyFlowerToolToken || phase == 0 || phase == 3)) {
+        // buy the token
+        if (currentPlayer == myID
+                &&(activeShop == type || buyFlowerToolToken || phase == 0 || phase == 3)
+                && $(this).parent().hasClass('goods')) {
             var index = $('.goods').eq(type).children().index( $(this) );
             playerAction(myID, type, index);
         }
-        else if (phase == 4) 
-            $(this).toggleClass('chosen');
-        else if ($(this).parent().hasClass('.player_vase')) {
-            var index = $('#my_vase').children().index( $(this) );
-            if (window.confirm('discard this flower token?'))
-                players[myID].discardFlowerToken(index);
+        else if ($(this).parent().hasClass('player_vase')) {
+            // select the token during arranging phase
+            if (phase == 4)
+                $(this).toggleClass('chosen');
+            // discard the token during other phases
+            else if (phase == 0 || phase == 2 || phase == 3) {
+                var index = $('#my_vase').children().index( $(this) );
+                if (window.confirm('discard this flower token?'))
+                    players[myID].discardFlowerToken(index);
+            }
         }
     });
 
     $(document).on('click', '.flower_card', function() {
-        // take the card
-        if (currentPlayer == myID && (activeShop == 4 || phase == 0 || phase == 3)) {
+        // take the card from shop
+        if (currentPlayer == myID 
+                && (activeShop == 4 || phase == 0 || phase == 3)
+                && $(this).parent().hasClass('goods')) {
             var index = $('#goods5').children().index( $(this) );
             playerAction(myID, 4, index);
         }
@@ -70,15 +86,17 @@ $(document).ready(function(){
                 $(this).addClass('chosen');
             }
         }
-        else if ($(this).parent().hasClass('.player_hand')) {
+        // discard the card during phase 0, 2, 3
+        else if ($(this).parent().hasClass('player_hand')) {
             var index = $('#my_hand').children().index( $(this) );
-            if (window.confirm('discard this flower token?'))
+            if (window.confirm('discard this card?'))
                 players[myID].discardFlowerCard(index);
         }
     });
 
      $(document).on('click', '.tool', function() {
-        if (currentPlayer == myID && activeShop == 5)
+        if (currentPlayer == myID 
+            && (activeShop == 5 || phase == 0 || phase == 3))
             playerAction(myID, 5, $(this).val());
     });
 
@@ -139,6 +157,9 @@ $(document).ready(function(){
                         indices : findices,
                         ribbons : r
                     });
+                    for (i = 0; i < r; i ++) {
+                        $('#button_area .add_ribbons').find('option').last().remove();
+                    }
                 }
             }
         }
@@ -182,11 +203,11 @@ $(document).ready(function(){
         
         for (i = 0; i < numPlayers; i ++)
             players[i].bonus = playerBonuses[data.bonuses[i]];
-
         tieBreak = data.tieBreak;
+
+        // add labels on the board
         boardSetup();	
         
-        // add labels on the board
         for (i = 0; i < numPlayers; i ++) {
             var a = data.flowerCards[i];
 
@@ -211,12 +232,18 @@ $(document).ready(function(){
                 $card.append($('<br>'));
                 // add required quality
                 $card.append(
+                    $('<img/>')
+                        .attr('src','img/card_quality_icon.png')
+                        .addClass('card_icon'),
                     $('<div/>')
                         .text(a[3])
                         .addClass('quality_symbol')
                 );
                 // add score
                 $card.append(
+                    $('<img/>')
+                        .attr('src','img/card_score_icon.png')
+                        .addClass('card_icon'),
                     $('<div/>')
                         .text(a[4])
                         .addClass('score_symbol')
@@ -233,13 +260,42 @@ $(document).ready(function(){
                 );
         }
 
-        $('#gamelog').empty();
-        addLog("*");
-        addLog("***** Turn " + turn + "******");
-        addLog("*");
-        currentPlayer = -1;
-        nextPlayer();
-    });
+        // add achievements (= # of players)
+        achievements = [];
+        for (i = 0; i < data.achieve.length; i ++) {
+            var $accard = $('<img/>').attr('src','img/achievement' + data.achieve[i] + '.png')
+                    .addClass('achievement_card');
+
+            $('#achievement_area').append($accard);
+            achievements.push(new achievementCard(data.achieve[i], $accard));
+
+            $('#achievement_area--large').append(
+                $('<img/>').attr('src','img/achievement' + data.achieve[i] + '.png')
+                    .addClass('achievement_card--large')
+            );
+        }
+
+        $('#achievement_area').append(
+            $('<button/>').text('Expand')
+                .addClass('button--expand_achievement')
+                .css({'position':'absolute','top':'0'})
+        );
+
+        $('#achievement_area--large').append(
+            $('<button/>').text('Close')
+                .addClass('button--expand_achievement')
+        );
+
+        $('#achievement_area--large').hide();
+            $('#gamelog').empty();
+            addLog("*");
+            addLog("***** Turn " + turn + "******");
+            addLog("*");
+            $('.status_bar--turn').text('Turn ' + turn);
+            $('.status_bar--phase').text('Phase 0: Planning Phase');
+            currentPlayer = -1;
+            nextPlayer();
+        });
 
     // get the new market from the server
     socket.on('market generated', function(data) {
@@ -290,6 +346,9 @@ $(document).ready(function(){
                         .attr('ondrop', 'drop(event)')
                         .attr('ondragover', 'allowDrop(event)')
                 );
+
+                $('.status_bar--turn').text('Turn ' + turn);
+                $('.status_bar--phase').text('Phase 1: Planning Phase');
                 break;
 
             // from planning to buy phase
@@ -310,6 +369,9 @@ $(document).ready(function(){
                 activeShop = 0;
                 activeTokenOrder = -1;
                 $('.shop').eq(0).addClass('active');
+
+                $('.status_bar--turn').text('Turn ' + turn);
+                $('.status_bar--phase').text('Phase 2: Buy Phase');
                 nextPlayer();
                 break;
 
@@ -319,19 +381,23 @@ $(document).ready(function(){
                 if (tutorial)
                     addLog(">> You may spend 2 action cubes to buy anything");
                 $('.time_token_area').empty();
+
                 $('#button_area').append(
                     $('<button/>').addClass('pass_button')
                         .text('Pass')
                 );
                 phase = 3;
                 currentPlayer = -1;
+                $('.status_bar--turn').text('Turn ' + turn);
+                $('.status_bar--phase').text('Phase 3: After-market Phase');
+                $('.status_bar--text').empty();
                 nextPlayer();
                 break;
 
             // from after market to flower arranging phase
             case 3:
                 $('#button_area').append(
-                    $('<button/>').addClass('submit_button')
+                    $('<button/>').addClass('submit_button mdl-button mdl-js-button mdl-button--fab')
                         .text('Arrange')
                 );
 
@@ -341,13 +407,13 @@ $(document).ready(function(){
                 );
 
                 var $addRibbons = $('<select/>').addClass('add_ribbons');
-                $addRibbons.append(
-                    $('<option/>').val(0).text('0 ribbon')
-                );
-                for (i = 1; i < players[myID].numRibbons; i ++)
+
+                for (i = 0; i <= players[myID].numRibbons; i ++) {
+                    var suffix = (i >= 1) ? ' ribbons' : ' ribbon';
                     $addRibbons.append(
-                        $('<option/>').val(i).text(i + ' ribbons')
-                );
+                        $('<option/>').val(i).text(i + suffix)
+                    );
+                }  
 
                 $('#button_area').append($addRibbons);
 
@@ -365,6 +431,9 @@ $(document).ready(function(){
 							socket.emit('finish arranging');
 						}
                 phase = 4;
+                $('.status_bar--turn').text('Turn ' + turn);
+                $('.status_bar--phase').text('Phase 4: Arranging Phase');
+                $('.status_bar--text').empty();
                 break;
 
             // from flower arranging phase to next turn (early bird phase)
@@ -428,6 +497,8 @@ $(document).ready(function(){
                     turn ++;
                     phase = 0;
                     currentPlayer = -1;
+                    $('.status_bar--turn').text('Turn ' + turn);
+                    $('.status_bar--phase').text('Phase 0: Early-bird Phase');
                     nextPlayer();
 
                     addLog("*");
@@ -488,6 +559,10 @@ $(document).ready(function(){
             data: data.text,
             dataType: 'text'
         });
+    })
+
+    socket.on('autoplay toggled', function(data) {
+        players[data.id].isBot = data.newStatus;
     })
 });
 

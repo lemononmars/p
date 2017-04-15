@@ -1,6 +1,10 @@
-/*
-* set up the board by adding labels and player boards
-*/
+
+///////////////////////////////////////////////////////////////////
+//
+//  set up the board by adding labels and player boards
+//
+////////////////////////////////////////////////////////////////////
+
 
 function boardSetup() {
 	shops = [[],[],[],[],[],[]];
@@ -25,15 +29,14 @@ function boardSetup() {
 		players[c].numRibbons += i%2;
 	}
 
-	// add achievements (= # of players)
-	achievements = [];
-	var temp = [0,1,2,3,4,5,6,7];
-	shuffle(temp);
-	var achieve = temp.splice(0, numPlayers);
-
-	for (i = 0; i < achieve.length; i ++) {
-		achievements.push(new achievementCard(achieve[i]));
-	}
+	// add status bar
+	var $statusBar = $('<div/>').addClass('status_bar')
+		.append(
+			$('<span/>').addClass('status_bar--turn'),
+			$('<span/>').addClass('status_bar--phase'),
+			$('<span/>').addClass('status_bar--text')
+		);
+	$('#status_bar').append($statusBar);
 
 	// add opponents' boards on the top
 	$('#opponent_board_area').empty();
@@ -46,7 +49,7 @@ function boardSetup() {
 			var $name = $('<span/>').addClass('player_name').text(players[i].username);
 			var $money = $('<span/>').addClass('player_money').text(players[i].money);
 			var $score = $('<span/>').addClass('player_score').text(players[i].score);
-			var $vase = $('<div/>').addClass('player_vase');
+			var $vase = $('<div/>').addClass('player_vase').addClass('player_vase--opponent');
 
 			for (j = 0; j < 3; j ++)
 				$($vase).append(
@@ -151,9 +154,11 @@ function boardSetup() {
 	);
 }
 
-/*
- *  generate goods according to player count (num)
- */ 
+///////////////////////////////////////////////////////////////////
+//
+//  generate goods according to player count (num)
+//
+////////////////////////////////////////////////////////////////////
 
 function generateGoods(num) {
 	var goods = [[],[],[],[],[],[]];
@@ -197,9 +202,10 @@ function newMarket(goods) {
 		shops[0].push(goods[0][i]);
 		$('#goods1').append(
 			$("<button></button>")
-			.text("$" + goods[0][i])
+			.text("฿" + goods[0][i])
 			.addClass("money")
 			.val(i)
+			.fadeIn("slow")
 		);	//*todo - change button to image
 	}
 
@@ -215,7 +221,8 @@ function newMarket(goods) {
 					.attr('src', 'img/f' + j + 'q' + goods[j][i][1] + '.jpg')
 					.addClass('flower' + j)
 					.addClass('flower_token')
-					.val(i);
+					.val(i)
+					.fadeIn("slow");
 			// dummy components to store data
 			$(ftoken).data({
 				type: j,
@@ -257,6 +264,9 @@ function newMarket(goods) {
 		$card.append($('<br>'));
 		// add required quality
 		$card.append(
+			$('<img/>')
+				.attr('src','img/card_quality_icon.png')
+				.addClass('card_icon'),
 			$('<div/>')
 				.text(a[3])
 				.val(a[3])
@@ -264,11 +274,15 @@ function newMarket(goods) {
 		);
 		// add score
 		$card.append(
+			$('<img/>')
+				.attr('src','img/card_score_icon.png')
+				.addClass('card_icon'),
 			$('<div/>')
 				.text(a[4])
 				.val(a[4])
 				.addClass('score_symbol')
 		);
+
 		$('#goods5').append($card);
 	}
 
