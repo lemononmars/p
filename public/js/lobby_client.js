@@ -72,7 +72,7 @@ $(document).ready(function(){
             $('#login_page').hide();
             $('#menu_bar').show();
             $('#gamelist_lobby').show();
-            // $('#chat_box').show();
+            $('#chat_box').show();
             $('#chat_messages').append($('<li/>').text('Welcome !'));
 
             myroom = -1;

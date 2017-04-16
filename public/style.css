@@ -126,8 +126,9 @@ table {
 	z-index: 1;
 	position: fixed;
 	bottom: 0;
-	width: 50%;
-	height: 35%;
+	right: 0;
+	width: 350px;
+	height: 180px;
 	margin: auto;
 }
 
@@ -136,7 +137,7 @@ table {
 	display: inline-block;
 	list-style-type: none;
 	width: 100%;
-	height: 80%;
+	height: 145px;
 	background:antiquewhite;
 	overflow-y: auto;
 	border: 2px black solid;
@@ -154,9 +155,8 @@ table {
 	position: absolute;
 	display: inline-block;
 	bottom: 0; 
-	margin-bottom: 10px;
 	background: #000; 
-	width: 40%; 
+	width: 250px; 
 	height: 25px;
 	padding: 5px;
 }
