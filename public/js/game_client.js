@@ -202,7 +202,7 @@ $(document).ready(function(){
         $('.autoplay_button').remove();
         var $autoplayOn = $('<button/>').text('Autoplay: On').addClass('autoplay_button').hide();
         var $autoplayOff = $('<button/>').text('Autoplay: Off').addClass('autoplay_button');
-        $('#gamelog_window').append($autoplayOn).append($autoplayOff);
+        //$('#gamelog_window').append($autoplayOn).append($autoplayOff);
 
         $('.language_toggle').remove();
         var $langTH = $('<button/>').text('ไทย').addClass('language_toggle').hide();
@@ -354,14 +354,15 @@ $(document).ready(function(){
                             .val(mtt[i])
                     );
                 }
-                // random button is for testing only !!!!!
                 $('#button_area').append(
                     $('<button/>').addClass('submit_button')
                         .text('Submit')
-                ).append(
+                );
+                // random button is for testing only !!!!!
+                /*$('#button_area').append(
                     $('<button/>').addClass('random_button')
                         .text('Random')
-                );
+                );*/
 
                 addLog("----- planning phase -----");
                 if (language === 'EN')
