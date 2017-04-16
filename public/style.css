@@ -210,7 +210,7 @@ table {
 #status_bar {
 	display: inline-block;
 	text-align: center;
-	width: 300px;
+	width: 400px;
 	height: 20px;
 	padding: 2px;
 	background: white;
@@ -219,6 +219,7 @@ table {
 
 #tie_break_track {
 	display: inline-block;
+	padding: 2px;
 }
 
 .status_bar--turn {
@@ -257,9 +258,25 @@ table {
 	height: 100px;
 }
 
+#tool_lookup {
+	width: 320px;
+	height: 280px;
+	z-index: 1;
+	position: fixed;
+	top: 200px;
+	right: -400px;
+	transition: 0.3s;
+	background-color: black;
+	padding: 5px;
+}
+
 #time_token_area {
 	width: 100%;
 	height: 50px;
+}
+
+#my_name {
+	text-align: center;
 }
 
 #my_area {
@@ -297,14 +314,20 @@ table {
 #button_area {
 	position: absolute;
 	top: 0;
+	width: 450px;
+	height: 50px;
+	padding: 2px;
 	display: inline-block;
-	margin-top: auto;
+	border: 2px black solid;
+	border-radius: 5px;
 }
 
 #achievement_area {
+	text-align: center;
 	position: relative;
 	display: inline-block;
-	margin: auto;
+	width: 450px;
+	height: 120px;
 	border: 2px black solid;
 }
 
@@ -312,14 +335,42 @@ table {
 	display: inline-block;
 	position: fixed;
 	z-index: 1;
-	padding-top: 100px;
-	padding-left: 50px;
-	top: 0;
-	bottom: 0;
-	width: 100%;
-	height: 100%;
+	bottom: -350px;
+	right: 0;
+	transition: 0.3s;
+	height: 280px;
 	background-color: black;
-	opacity: 0.9;
+	padding: 20px 5px 5px 5px;
+}
+
+#notification {
+	visibility: hidden;
+    min-width: 250px;
+    margin-left: -125px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 2px;
+    padding: 16px;
+    position: fixed;
+    z-index: 2;
+    left: 50%;
+    bottom: 30px;
+}
+
+#notification.show {
+	visibility: visible;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
 }
 
 .icon {
@@ -388,6 +439,7 @@ table {
 
 .tie_break_token {
 	display: inline-block;
+	text-align: center;
 	width: 20px;
 	height: 20px;
 	margin: 2px;
@@ -396,8 +448,8 @@ table {
 }
 
 .shop_image {
-	width: 200px;
-	height: 150px;
+	width: 180px;
+	height: 130px;
 }
 
 .empty_vase {
@@ -415,7 +467,14 @@ table {
 	height: 40px;
 }
 
-.small_icon {
+.tool--large {
+	display: inline-block;
+	margin: 2px;
+	width: 60px;
+	height: 60px;
+}
+
+.icon--small {
 	width: 15px;
 	height: 15px;
 	margin: 1px;
@@ -483,9 +542,11 @@ table {
 }
 
 .achievement_card {
+	display: inline-block;
 	width: 60px;
 	height: 90px;
-	margin: 3px;
+	margin: 1px;
+	border: 3px solid transparent;
 }
 
 .achievement_card--large {
@@ -495,20 +556,35 @@ table {
 }
 
 .achievement_card--claimed{
-	opacity: 0.2;
+	opacity: 0.3;
 }
 
-.button--expand_achievement {
+.button--expand_achievement{
 	border: none;
+	position: absolute;
+	top: 0;
+	right: 0;
 	width: 60px;
 	height: 20px;
+	margin: 2px;
 	color: white;
 	background-color: brown;
 }
 
-.button--expand_achievement:hover{
+.button--expand_tool{
+	border: none;
+	position: absolute;
+	width: 60px;
+	height: 20px;
+	color: white;
+	background-color: brown;
+	margin: 2px;
+}
+
+.button--expand_achievement:hover, .button--expand_tool:hover{
 	opacity: 0.7;
 }
+
 
 @keyframes blink { 
    50% { opacity : 0.5; } 

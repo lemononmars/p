@@ -7,6 +7,11 @@ function playerAction(id, location, index) {
 			location : location,
 			index : index
 		});
+		if (!buyFlowerToolToken)
+        	nextPlayer();
+		if (currentPlayer >= 0 && myID == 0 && players[currentPlayer].isBot) {
+			botAction(currentPlayer);
+		}
 	}
 	return success;
 }
@@ -32,7 +37,8 @@ function takeAction(id, location, index) {
         if (phase == 2)
     		players[id].actionCubes ++;
 
-        nextPlayer();	// *todo - ping next player
+		if (buyFlowerToolToken)
+			buyFlowerToolToken = false;
 		players[id].update();
 		return true;
 	}
@@ -40,7 +46,7 @@ function takeAction(id, location, index) {
 	switch(location) {
 		case 0:
 			players[id].money += shops[0][index];
-			addLog(players[id].username + " gains $" + shops[0][index], id);
+			addLog(players[id].username + " gains ฿" + shops[0][index], id);
 			// remove the component from the board
 			$('#goods1').children()
 				.eq(index)
@@ -49,12 +55,18 @@ function takeAction(id, location, index) {
 			break;
 		case 1: case 2: case 3:
 			if (players[id].money < 1 && !buyFlowerToolToken) {
-				addLog(">> Not enough money");
+				if (language === 'EN')
+					addNoti("Not enough money");
+				else
+					addNoti("เงินไม่พอ");
 				return false;
 			}
 			if (players[id].vases.length >= players[id].numVases) {
 				if (id == myID)
-					addLog(">> Your vases are full. Discard a flower token or pass.");
+					if (language === 'EN')
+						addNoti("Your vases are full. Discard a flower token or pass.");
+					else
+						addNoti("ดอกไม้เต็มแล้ว คลิกที่เบี้ยดอกไม้เพื่อทิ้ง หรือ Pass เพื่อผ่าน")
 				return false;
 			}
 			else {
@@ -74,7 +86,10 @@ function takeAction(id, location, index) {
 		case 4:
 			if (players[id].hand.length >= handLimit) {
 				if (id == myID)
-					addLog(">> Your hand is full. Discard a card or pass.");
+					if (language === 'EN')
+						addNoti("Your hand is full. Discard a card or pass.");
+					else
+						addNoti("การ์ดเต็มมือ คลิกที่การ์ดในมือเพื่อทิ้ง หรือ Pass เพื่อผ่าน");
 				return false;
 			}
 			else {
@@ -88,30 +103,29 @@ function takeAction(id, location, index) {
 			break;
 		case 5:
 			if (players[id].money < shops[5][index].getCost()) {
-				addLog("Not enough money");
+				if (language === 'EN')
+					addNoti("Not enough money");
+				else
+					addNoti("เงินไม่พอ");
 				return false;
 			}
 			addLog(players[id].username + " buys " + shops[5][index].toString(), id);
 			players[id].getToolToken(shops[5][index]);
 			players[id].money -= shops[5][index].getCost();
 			shops[5][index].levelDown(1);
+			// change the image and title
 			$('#goods6 img')
 				.filter(function() {return $(this).val() == index;})
-				.attr('src', 'img/tool' + index + 'lv' + shops[5][index].level + '.jpg' );
+				.attr('src', 'img/tool' + index + 'lv' + shops[5][index].level + '.jpg' )
+				.attr('title', shops[5][index].toString());
 
 			break;
-		default:	// invalid location
-			addLog("What are you doing?", id);
-			return false;
 	}
 	// it costs extra action cubes if you take action during these phases
 	if (phase == 0 && location < 6)
 		players[id].actionCubes -= 3;
 	if (phase == 3 && location < 6)
 		players[id].actionCubes -= 2;
-
-    if (!buyFlowerToolToken)
-        nextPlayer();
 
 	// update displayed information
 	players[id].update();

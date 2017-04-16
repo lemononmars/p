@@ -33,7 +33,8 @@ var tieBreak;			// determine who buys first in case of tie
 
 // cosmetic
 var blink;
-var titleBlink = false;				// blinking title when it's your turn
+var titleBlink = false;	// blinking title when it's your turn
+var language;	
 
 //////////////////////////////////////////////////////////////////////////////////////
 // add a player after username is submitted and display waiting room
@@ -107,6 +108,15 @@ function addLog(msg, id) {
 	$('#gamelog').scrollTop($('#gamelog')[0].scrollHeight);
 }
 
+// popup the snackbar
+function addNoti(msg) {
+	$('#notification').addClass('show');
+	$('#notification').text(msg);
+	setTimeout(function() {
+		$('#notification').removeClass('show')
+	}, 3000);
+}
+
 // return a random integer from 0 to a-1 inclusive
 function ran(a) {
 	return Math.floor(Math.random() * a);
@@ -125,12 +135,9 @@ function shuffle(a) {
 
 // collect, sort, and create components for all player's time tokens
 function collectTimeTokens() {
-	$allPlayedTimeTokens = [[],[],[],[],[],[]];
-
 	// sort them and then create components for tokens
 	for (k = 0; k < 6; k ++) {
 		var temp = [];
-		var area = k+1;
 		for (j = 0; j < numPlayers; j++)
 			temp.push(new timeToken(j,players[j].myPlayedTimeTokens[k]));
 		sortTimeToken(temp);
@@ -148,6 +155,7 @@ function collectTimeTokens() {
 				$tt.css('opacity', 0.2);
 				$tt.val(-1);
 			}
+			var area = k+1;
 			$('#timetokenarea' + area).append($tt);
 		}
 	}
@@ -177,6 +185,8 @@ function goFirst(id) {
 	if (t > 0)
 		$('.tie_break_token').eq(0).before( $('.tie_break_token').eq(t) );
 	$('.tie_break_token').eq(0).fadeIn();
+	for (i = 0; i < numPlayers; i ++)
+		$('.tie_break_token').eq(i).text(Number(i+1));
 }
 
 // find the next player
@@ -221,7 +231,7 @@ function nextPlayer () {
 		// find the next player who has enough action cubes to spend
 		var cubesNeeded = (phase == 0)? 3 : 2; 
 		// currentPlayer is set to be -1 at the beginning of phase 0 & 3
-		var index = (currentPlayer == -1) ? 0: tieBreak.indexOf(currentPlayer) + 1;
+		var index = (currentPlayer == -1) ? 0: tieBreak.indexOf(Number(currentPlayer)) + 1;
 		while (index < numPlayers && players[tieBreak[index]].actionCubes < cubesNeeded) {
 			index++;
 		}
@@ -236,11 +246,13 @@ function nextPlayer () {
 	}
 
 	currentPlayer = nextP;
-	// make the title blink to remind the player's turn
+	
 	if (nextP >= 0)
-		$('.status_bar--text').text(players[nextP].username + "'turn")
+		$('.status_bar--text').text(players[nextP].username + "'s turn")
 			.css('background-color', players[nextP].color);
+	
 	if (nextP == myID) {
+		// make the title blink to remind the player's turn
 		$('#status_bar').addClass('active');
 		blink = setInterval(function() {
 			document.title = (titleBlink) ? '!! Your Turn !!' : 'Pakklong Talat';
@@ -248,20 +260,27 @@ function nextPlayer () {
 			$('link[rel="icon"]').attr('href', link);
 			titleBlink = !titleBlink;
 		}, 700);
+		// add the pass button
+		if (phase == 0 || phase == 3)
+			$('#button_area').append(
+				$('<button/>').addClass('pass_button')
+					.text('Pass')
+		);
 	}
 	else {
+		// undo the fancy blinking
 		$('#status_bar').removeClass('active');
 		clearInterval(blink);
 		titleBlink = false;
+		$('link[rel="icon"]').attr('href', 'img/title_icon.png');
 		document.title = 'Pakklong Talat';
-	}
-
-	// if the next player is a bot, let it take some action
-	if (nextP >= 0 && myID == 0 && players[nextP].isBot) {
-		botAction(nextP);
+		// remove the pass button
+		if (phase == 0 || phase == 3)
+			$('.pass_button').remove();
 	}
 }
 
+// return the id of the active player during buy phase
 function getActiveTimeToken() {
 	return $('.time_token_area').eq(activeShop)
 			.children('.time_token').eq(activeTokenOrder)

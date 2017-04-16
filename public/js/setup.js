@@ -17,12 +17,16 @@ function boardSetup() {
 
 	// add tie break track
     $('#tie_break_track').empty();
+	$('#tie_break_track').append(
+		$('<span/>').text('Tie Break:')
+	);
 	for (i = 0; i < numPlayers; i ++) {
 		var c = tieBreak[i];
 		$('#tie_break_track').append(
 			$('<div/>')
 				.addClass('tie_break_token')
 				.css('background-color', playerColors[c])
+				.text(Number(i+1))
 		);
 		// distribute starting resources depending on tie break order
 		players[c].money += (startingMoney + Math.floor(i/2));
@@ -36,6 +40,7 @@ function boardSetup() {
 			$('<span/>').addClass('status_bar--phase'),
 			$('<span/>').addClass('status_bar--text')
 		);
+	$('#status_bar').empty();
 	$('#status_bar').append($statusBar);
 
 	// add opponents' boards on the top
@@ -54,19 +59,19 @@ function boardSetup() {
 			for (j = 0; j < 3; j ++)
 				$($vase).append(
 					$('<img/>').attr('src', 'img/empty_vase.png')
-						.addClass('small_icon')
+						.addClass('icon--small')
 						.addClass('empty_vase')
 				);
 
 			$($board).append($name)
 				.append(
 					$('<img/>').attr('src','img/money_icon.png')
-						.addClass('small_icon')
+						.addClass('icon--small')
 				)
 				.append($money)
 				.append(
 					$('<img/>').attr('src','img/score_icon.png')
-						.addClass('small_icon')
+						.addClass('icon--small')
 				)
 				.append($score)
 				.append($vase);
@@ -74,78 +79,76 @@ function boardSetup() {
 			$('#opponent_board_area').append($board);
 			players[i].addBoard($board);
 		}
-	// add your board at the bottom
+
+	// add info to your board at the bottom of the screen
 	$('#my_board').css('background-color', playerColors[myID])
 		.val(myID);
 
 	// clean up stuff from previous game
-	$('#my_board td').empty();
 
-	$('#my_name').append( 
-		$('<span/>').text(myusername)
-	);
+	$('#my_name .player_name').empty();
+	$('#my_name .player_name').text(myusername);
 
-	// money
-	$('#my_money').append(
-		$('<img/>').attr('src','img/money_icon.png')
-			.attr('title', 'money')
-			.addClass('icon')
-	).append( 
-		$('<span/>').text(players[myID].money)
-			.addClass('player_money')
-	);
-
-	// score
-	$('#my_score').append(
-		$('<img/>').attr('src','img/score_icon.png')
-			.attr('title', 'score')
-			.addClass('icon')
-	).append(
-		$('<span/>').text(0)
-			.addClass('player_score')
-	);
-
-	// ribbon
-	$('#my_ribbon').append(
-		$('<img/>').attr('src','img/ribbon_icon.png')
-			.addClass('icon')
-	).append( 
-		$('<span/>').text(players[myID].numRibbons)
-			.addClass('player_ribbon')	
-	);	
-
-	// action cube
-	$('#my_action_cube').append(
-		$('<img/>').attr('src','img/action_cube_icon.png')
-			.attr('title', 'action cubes')
-			.addClass('icon')
-	).append( 
-		$('<span/>').text(0)
-			.addClass('player_action_cube')
-	);
+	// starting resources
+	$('#my_money .player_money').text(players[myID].money);
+	$('#my_score .player_score').text(0);
+	$('#my_ribbon .player_ribbon').text(players[myID].numRibbons);	
+	$('#my_action_cube .player_action_cube').text(0);
 
 	// time_track
+	$('#my_time_track').empty();
 	$('#my_time_track').append(
 		$('<img/>').attr('src','img/time_track0.png')
 			.addClass('time_track_image')
 	)
 
+	$('#my_hand').empty();
+	$('#my_vase').empty();
 	for (i = 1; i < 4; i ++) {
+		var starColor = players[myID].bonus[i-1] + 1;
+		$('#bonus_icon' + i).empty();
 		$('#bonus_icon' + i).append(
 			$('<img/>').attr('src', 'img/bonus_icon' + i + '.png')
 				.addClass('icon')
-				.css('background-color', shopColors[players[myID].bonus[i-1] + 1])
+				.css('background-color', shopColors[starColor])
 		);
+		$('#my_bonus' + i).empty();
 		$('#my_bonus' + i).append(
 			$('<span/>').text(0)
 				.addClass('bonus_star')
-				.css('background-color', shopColors[players[myID].bonus[i-1] + 1])
+				.css('background-color', shopColors[starColor])
+		).append(
+			$('<img/>').attr('src', 'img/star_icon' + starColor + '.png')
+				.addClass('icon--small')
 		);
 
 		$('#my_vase').append(
 			$('<img/>').attr('src', 'img/empty_vase.png')
 				.addClass('empty_vase')
 		);
+	}
+
+	// add popup area that shows all tools with all levels
+	$('#tool_lookup').empty();
+	$('#tool_lookup').append(
+		$('<button/>').text('Close')
+			.addClass('button--expand_tool')
+	);
+
+	for (i = 0; i < 3; i ++ ) {
+		$('#tool_lookup').append($('<br>'));
+		$('#tool_lookup').append(
+			$('<span/>').text('level ' + i).css('color', 'white')
+		);
+		$('#tool_lookup').append($('<br>'));
+		for (j = 0; j < 5; j ++) {
+			$('#tool_lookup').append(
+				$("<img/>")
+					.attr('src', 'img/tool' + j + 'lv' + i + '.jpg' )
+					.addClass('tool--large')
+					.val(i)
+			);
+		}
 	}
 
 	// initialize board component
@@ -292,8 +295,13 @@ function newMarket(goods) {
 		$('#goods6').append(
 			$("<img/>")
 				.attr('src', 'img/tool' + i + 'lv' + shops[5][i].level + '.jpg' )
+				.attr('title', shops[5][i].toString())
 				.addClass('tool')
 				.val(i)
 		);
 	}
+	$('#goods6').append(
+		$('<button/>').text('See All')
+			.addClass('button--expand_tool')
+	);
 }

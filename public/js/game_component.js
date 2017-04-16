@@ -20,21 +20,21 @@ function flowerCard(f0, f1, f2, quality, score, level) {
 			sum += flowerTokens[i].quality;
 		}
 		if (sum < quality) {
-			addLog("Quality not satisfied");
+			addNoti("Quality not satisfied");
 			return false;
 		}
 		// need exact number for each type
 		if(type[0] < this.flowers[0] || type[1] < this.flowers[1] || type[2] < this.flowers[2]) {
-			addLog("Not enough flowers of some type");
+			addNoti("Not enough flowers of some type");
 			return false;
 		}
 		if(type[0] > this.flowers[0] || type[1] > this.flowers[1] || type[2] > this.flowers[2]) {
-			addLog("Too many flowers of some type");
+			addNoti("Too many flowers of some type");
 			return false;
 		}
 		// if it's possible to arrange with one fewer ribbon, why not? how kind I am !
 		if (numRibbons > 0 && sum - 2 >= quality) {
-			addLog("Too many ribbons?");
+			addNoti("Too many ribbons?");
 			return false;
 		}
 		return true;
@@ -47,10 +47,6 @@ function flowerCard(f0, f1, f2, quality, score, level) {
 	this.getFlowersAt = function(index) {
 		if(index == 0 || index == 1 || index == 2)
 			return this.flowers[index];
-	};
-	
-	this.getRewards = function () {
-		return this.rewards;
 	};
 }
 
@@ -67,7 +63,7 @@ function toolToken(type) {
 
 	this.getCost = function() {
 		return toolCost[this.type][this.level];
-	}
+	};
 
 	// return the number of tools you get (1 or 2)
 	this.getAmount = function() {
@@ -93,9 +89,7 @@ function toolToken(type) {
 
 	this.toString = function() {
 		return toolString[this.type][this.level] + ' for ฿' + toolCost[this.type][this.level];
-	};
-
-	
+	};	
 }
 
 // info of time token
@@ -104,10 +98,9 @@ function timeToken(id, value) {
 	this.value = value;
 }
 
-function achievementCard (type, $card) {
+// info of achievement cards
+function achievementCard (type) {
 	this.type = type;
-	this.$card = $card;
-
 	this.claimed = false;
 	this.claimer = 0;
 
@@ -147,7 +140,15 @@ function achievementCard (type, $card) {
 		}
 		if (this.claimed) {
 			this.claimer = id;
-			$(this.$card).addClass('achievement_card--claimed');
+			addLog(players[id].username + ' claimed an achievement #' + this.type + ' !', id);
+			var t = this.type;
+			$('.achievement_card').filter( 
+				function() { return $(this).val() == t}
+			).css('border-color',players[id].color);
+
+			$('.achievement_card--large').filter( 
+				function() { return $(this).val() == t}
+			).addClass('achievement_card--claimed');
 		}
 		return this.claimed;
 	};

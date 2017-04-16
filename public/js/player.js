@@ -55,7 +55,7 @@ function player(id, username, color, bot) {
 		this.vases.push(ftoken);
 		$($ftoken).fadeIn("slow");
 		if (this.id != myID)
-			$($ftoken).addClass('small_icon');
+			$($ftoken).addClass('icon--small');
 		$(this.myBoard)
 			.find('.player_vase')
 			.append($ftoken);
@@ -80,7 +80,7 @@ function player(id, username, color, bot) {
 			var $v = $('<img/>').attr('src', 'img/empty_vase.png')
 						.addClass('empty_vase');
 			if (this.id != myID)
-				$($v).addClass('small_icon');
+				$($v).addClass('icon--small');
 			$(this.myBoard)
 				.find('.player_vase')
 				.prepend($v);
@@ -110,7 +110,7 @@ function player(id, username, color, bot) {
 								.addClass('empty_vase')
 								.fadeIn("slow");
 					if (this.id != myID)
-						$($v).addClass('small_icon');
+						$($v).addClass('icon--small');
 					this.numVases ++;
 					$(this.myBoard)
 						.find('.player_vase')
@@ -121,7 +121,7 @@ function player(id, username, color, bot) {
 					var $v = $('<img/>').attr('src', 'img/empty_vase.png')
 								.addClass('empty_vase');
 					if (this.id != myID)
-						$($v).addClass('small_icon');
+						$($v).addClass('icon--small');
 					$(this.myBoard)
 						.find('.player_vase')
 						.prepend($v);
@@ -133,7 +133,14 @@ function player(id, username, color, bot) {
 				break;
 			case 3: 
 				buyFlowerToolToken = true; 
-				addLog(">> You may buy any leftover flower");
+				if (language == 'EN')
+					addLog(">> You may buy any leftover flower");
+				else
+					addLog(">> สามารถซื้อดอกไม้ในร้านใดก็ได้")
+				$('#shop2').addClass('active');
+				$('#shop3').addClass('active');
+				$('#shop4').addClass('active');
+				$('#shop6').removeClass('active')
 				break;	
 			case 4: 
 				goFirst(this.id); 
@@ -186,7 +193,6 @@ function player(id, username, color, bot) {
 	};
 
 	this.getAchievementRewards = function(rw) {
-		addLog(this.username + ' claimed an achievement !', this.id);
 		this.stars[0] += rw[0];
 		this.stars[1] += rw[1];
 		this.stars[2] += rw[2];

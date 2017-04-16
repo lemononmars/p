@@ -12,7 +12,18 @@ $(document).ready(function(){
     });
 
     $(document).on('click', '.button--expand_achievement', function () {
-        $('#achievement_area--large').toggle();
+        var newPos = $('#achievement_area--large').css('bottom') === '0px' ? '-350px': '0px';
+        $('#achievement_area--large').css('bottom', newPos);
+    });
+
+    $(document).on('click', '.button--expand_tool', function() { 
+        var newPos = $('#tool_lookup').css('right') === '0px' ? '-400px': '0px';
+        $('#tool_lookup').css('right', newPos);
+    });
+
+    $(document).on('click', '.language_toggle', function() { 
+        language = (language === 'EN') ? 'TH': 'EN';
+        $('.language_toggle').toggle();
     });
     // testing purpose only !
 
@@ -128,13 +139,12 @@ $(document).ready(function(){
         // check if card's requirements are all satisfied
         else if (phase == 4) {
             if ($('#my_hand').find('.chosen').length == 0)
-                alert('select a flower card');
+                addNoti('Select a flower card');
             else {
                 var cardIndex = $('#my_hand').find('.flower_card')
                     .index(
                         $('#my_hand').find('.chosen').eq(0) 
                     );
-                console.log(cardIndex + ' #cards=' + players[myID].hand.length);
                 var l = $('#my_vase').find('.chosen').length;
                 var ftokens = [];
                 var findices = [];
@@ -160,6 +170,7 @@ $(document).ready(function(){
                     for (i = 0; i < r; i ++) {
                         $('#button_area .add_ribbons').find('option').last().remove();
                     }
+                    addNoti('Arrangement successful !');
                 }
             }
         }
@@ -172,7 +183,8 @@ $(document).ready(function(){
             isDone = true;
             $('#my_hand').children().removeClass('chosen');
             $('#my_vase').children().removeClass('chosen');
-            addLog('Wait for other players to finish');
+            addNoti('Done! Wait for other players to finish');
+            $('#button_area').empty();
             socket.emit('finish arranging');
         }
     });
@@ -191,6 +203,12 @@ $(document).ready(function(){
         var $autoplayOn = $('<button/>').text('Autoplay: On').addClass('autoplay_button').hide();
         var $autoplayOff = $('<button/>').text('Autoplay: Off').addClass('autoplay_button');
         $('#gamelog_window').append($autoplayOn).append($autoplayOff);
+
+        $('.language_toggle').remove();
+        var $langTH = $('<button/>').text('ไทย').addClass('language_toggle').hide();
+        var $langEN = $('<button/>').text('Eng').addClass('language_toggle');
+        $('#gamelog_window').append($langTH).append($langEN);
+        language = 'EN';
         autoplay = false;
         
 	    startGame(data);
@@ -260,20 +278,14 @@ $(document).ready(function(){
                 );
         }
 
-        // add achievements (= # of players)
+        // add as many achievements as the number of players
         achievements = [];
-        for (i = 0; i < data.achieve.length; i ++) {
-            var $accard = $('<img/>').attr('src','img/achievement' + data.achieve[i] + '.png')
-                    .addClass('achievement_card');
-
-            $('#achievement_area').append($accard);
-            achievements.push(new achievementCard(data.achieve[i], $accard));
-
-            $('#achievement_area--large').append(
-                $('<img/>').attr('src','img/achievement' + data.achieve[i] + '.png')
-                    .addClass('achievement_card--large')
-            );
-        }
+        $('#achievement_area').empty();
+        $('#achievement_area').append(
+            $('<span/>').text('Achievements')
+        ).append(
+            $('<br>')
+        );
 
         $('#achievement_area').append(
             $('<button/>').text('Expand')
@@ -281,20 +293,35 @@ $(document).ready(function(){
                 .css({'position':'absolute','top':'0'})
         );
 
+        for (i = 0; i < data.achieve.length; i ++) {
+            var type = data.achieve[i];
+            var $accard = $('<img/>').attr('src','img/achievement' + type + '.png')
+                    .addClass('achievement_card')
+                    .val(type);
+
+            $('#achievement_area').append($accard);
+            achievements.push(new achievementCard(type));
+
+            $('#achievement_area--large').append(
+                $('<img/>').attr('src','img/achievement' + type + '.png')
+                    .addClass('achievement_card--large')
+                    .val(type)
+            );
+        }
+
         $('#achievement_area--large').append(
             $('<button/>').text('Close')
                 .addClass('button--expand_achievement')
         );
 
-        $('#achievement_area--large').hide();
-            $('#gamelog').empty();
-            addLog("*");
-            addLog("***** Turn " + turn + "******");
-            addLog("*");
-            $('.status_bar--turn').text('Turn ' + turn);
-            $('.status_bar--phase').text('Phase 0: Planning Phase');
-            currentPlayer = -1;
-            nextPlayer();
+        $('#gamelog').empty();
+        addLog("*");
+        addLog("***** Turn " + turn + "******");
+        addLog("*");
+        $('.status_bar--turn').text('Turn ' + turn);
+        $('.status_bar--phase').text('Phase 0: Planning Phase');
+        currentPlayer = -1;
+        nextPlayer();
         });
 
     // get the new market from the server
@@ -304,7 +331,12 @@ $(document).ready(function(){
 
     // the server tells you to move on to the next phase
     socket.on('to next phase', function(data) {
+        // clear the buttons and title animation
         $('#button_area').empty();
+        clearInterval(blink);
+		titleBlink = false;
+		$('link[rel="icon"]').attr('href', 'img/title_icon.png');
+		document.title = 'Pakklong Talat';
 
         switch(data.phase) {
             // from early-bird to planning phase
@@ -322,6 +354,7 @@ $(document).ready(function(){
                             .val(mtt[i])
                     );
                 }
+                // random button is for testing only !!!!!
                 $('#button_area').append(
                     $('<button/>').addClass('submit_button')
                         .text('Submit')
@@ -331,12 +364,13 @@ $(document).ready(function(){
                 );
 
                 addLog("----- planning phase -----");
-                if (tutorial)
-                    addLog(">> Click on two time tokens on the board to swap");
-
+                if (language === 'EN')
+                    addLog(">> Drag and drop time tokens to each shop");
+                else
+                    addLog(">> ลากเบี้ยเวลาไปวางในร้านแต่ละร้าน")
                 // select time tokens for bots in advance !
                 if (myID == 0)
-                    for (const p in players)
+                    for (var p in players)
                         if (players[p].isBot) 
                             botChooseTimeTokens(players[p].id);
                 phase = 1;
@@ -357,6 +391,7 @@ $(document).ready(function(){
                 $('.time_token_area').empty();
                 collectTimeTokens();
 
+                $('#button_area').empty();
                 $('#button_area').append(
                     $('<button/>').addClass('pass_button')
                         .text('Pass')
@@ -373,13 +408,17 @@ $(document).ready(function(){
                 $('.status_bar--turn').text('Turn ' + turn);
                 $('.status_bar--phase').text('Phase 2: Buy Phase');
                 nextPlayer();
+                if (currentPlayer >= 0 && myID == 0 && players[currentPlayer].isBot)
+			        botAction(currentPlayer);
                 break;
 
             // from buy to after market phase
             case 2:
                 addLog("------ after market phase ------");
-                if (tutorial)
+                if (language == 'EN')
                     addLog(">> You may spend 2 action cubes to buy anything");
+                else
+                    addLog(">> สามารถจ่าย Action cube 2 เม็ดเพื่อซื้ออะไรก็ได้")
                 $('.time_token_area').empty();
 
                 $('#button_area').append(
@@ -392,6 +431,8 @@ $(document).ready(function(){
                 $('.status_bar--phase').text('Phase 3: After-market Phase');
                 $('.status_bar--text').empty();
                 nextPlayer();
+                if (currentPlayer >= 0 && myID == 0 && players[currentPlayer].isBot)
+			        botAction(currentPlayer);
                 break;
 
             // from after market to flower arranging phase
@@ -418,16 +459,20 @@ $(document).ready(function(){
                 $('#button_area').append($addRibbons);
 
 				addLog("------ arranging phase ------");
-				if(tutorial) {
+				if(language === 'EN') {
 					addLog(">> Select a flower card & flower tokens to arrange");
-					addLog(">> or skip phase")
+					addLog(">> or click on 'skip phase'")
 				}
+                else {
+                    addLog(">> เลือกการ์ดดอกไม้และเบี้ยดอกไม้เพื่อจัดดอกไม้");
+                    addLog(">> หรือกด Skip Phase เพื่อข้ามเฟสนี้");
+                }
 
 				// arrange flowers for bot in advance !
 				if (myID == 0)
-					for (const p of players)
-						if (p.isBot) {
-							botArrangeFlower(p.id);
+					for (var p in players)
+						if (players[p].isBot) {
+							botArrangeFlower(players[p].id);
 							socket.emit('finish arranging');
 						}
                 phase = 4;
@@ -440,25 +485,30 @@ $(document).ready(function(){
             case 4:
                 isDone = false;
                 // see if anyone is eligible for any achievement
-                 for (const ac of achievements) {
+                for (var ac in achievements) {
                         for (i = 0; i < numPlayers; i ++)
-                            if (ac.check(tieBreak[i]))
-                                players[tieBreak[i]].getAchievementRewards(ac.getRewards());
-                    }
+                            if (achievements[ac].check(tieBreak[i]))
+                                players[tieBreak[i]].getAchievementRewards(achievements[ac].getRewards());
+                }
                 if (checkEndGame()) {
                     gameState = 3;
                     var winner = 0;
-                    addLog("------------- ------------- ------------- ");
-                    addLog("------------- Final Scoring ---------");
-                    addLog("------------- ------------- ------------- ");
+                    // display final scores
+                    addLog("------------- ------------- -------------");
+                    addLog("-------------  Final Scores -------------");
+                    addLog("------------- ------------- -------------");
                     for (k = 0; k < numPlayers; k ++) {
                         addLog(players[k].username + ' : ' + players[k].score, k);
                         if ((players[k].score > players[winner].score) ||
                             (players[k].score == players[winner].score && tieBreak.indexOf(k) < tieBreak.indexOf(winner)))
                             winner = k;
                     }
+                    // deterine the winner
                     addLog('||', winner);
-                    addLog('||  The winner is  ::: ' + players[winner].username + ' :::', winner);
+                    if (language === 'EN') 
+                        addLog('||  The winner is  ::: ' + players[winner].username + ' :::', winner);
+                    else
+                        addLog('||  ผู้ชนะคือ  ::: ' + players[winner].username + ' :::', winner);
                     addLog('||', winner);
 
                     // add miscellaneous info to game log
@@ -494,6 +544,13 @@ $(document).ready(function(){
                         });
                 } 
                 else {
+                    addLog("*");
+                    addLog("***** Turn " + turn + "******");
+                    addLog("*");
+                    addLog("----- early-bird phase -----");
+                    if (myID == 0)
+                        socket.emit('generate market', generateGoods(numPlayers));
+                    
                     turn ++;
                     phase = 0;
                     currentPlayer = -1;
@@ -501,16 +558,8 @@ $(document).ready(function(){
                     $('.status_bar--phase').text('Phase 0: Early-bird Phase');
                     nextPlayer();
 
-                    addLog("*");
-                    addLog("***** Turn " + turn + "******");
-                    addLog("*");
-                    addLog("----- early-bird phase -----");
-                    if (myID == 0)
-                        socket.emit('generate market', generateGoods(numPlayers));
-                    $('#button_area').append(
-                        $('<button/>').addClass('pass_button')
-                            .text('Pass')
-                    );
+                    if (currentPlayer >= 0 && myID == 0 && players[currentPlayer].isBot)
+			            botAction(currentPlayer);
                 }
                 break;
         } // end switch
@@ -531,6 +580,11 @@ $(document).ready(function(){
 
     socket.on('action taken', function(data) {
         takeAction(data.id, data.location, data.index);
+        if (!buyFlowerToolToken)
+            nextPlayer();
+        if (currentPlayer >= 0 && myID == 0 && players[currentPlayer].isBot) {
+            botAction(currentPlayer);
+	}
     });
 
     socket.on('flower arranged', function(data) {

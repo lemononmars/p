@@ -138,6 +138,7 @@
 						</tr>
 					</tbody>
 				</table>
+				<div id = "tool_lookup"></div>
 			</div>
 			<div id = "my_area">
 				<div id = "my_board_area">
@@ -146,15 +147,29 @@
 							<table class = "my_left_board_table">
 								<tbody>
 									<tr>
-										<td id = "my_name" class = "player_name" colspan = "6"></td>
+										<td id = "my_name" colspan = "6">
+											<span class = "player_name"></span>
+										</td>
 									</tr>
 									<tr>
-										<td id = "my_money" colspan = "3"></td>
-										<td id = "my_score" colspan = "3"></td>
+										<td id = "my_money" colspan = "3">
+											<img src = "img/money_icon.png" title = "money" class = "icon"></img>
+											<span class = "player_money"></span>
+										</td>
+										<td id = "my_score" colspan = "3">
+											<img src = "img/score_icon.png" title = "score" class = "icon"></img>
+											<span class = "player_score"></span>
+										</td>
 									</tr>
 									<tr>
-										<td id = "my_ribbon" colspan = "3"></td>
-										<td id = "my_action_cube" colspan = "3"></td>
+										<td id = "my_ribbon" colspan = "3">
+											<img src = "img/ribbon_icon.png" title = "ribbon" class = "icon"></img>
+											<span class = "player_ribbon"></span>
+										</td>
+										<td id = "my_action_cube" colspan = "3">
+											<img src = "img/action_cube_icon.png" title = "action cube" class = "icon"></img>
+											<span class = "player_action_cube"></span>
+										</td>
 									</tr>
 									<tr class = "player_bonus_icon">
 										<td id = "bonus_icon1" colspan = "2"></td>
@@ -189,6 +204,7 @@
 				<div id = "button_area"></div>
 				<div id = "achievement_area"></div>
 				<div id = "achievement_area--large"></div>
+				<div id = "notification"></div>
 			</div>
 			
 		</div>
@@ -211,5 +227,6 @@
 		<script src="js/player.js"></script>
 		<script src="js/player_action.js"></script>
 		<script src="js/setup.js"></script>
+		<script src="js/jquery.ui.touch-punch.min.js"></script>
 	</body>
 </html>

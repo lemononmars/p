@@ -1,70 +1,15 @@
 function botAction(id) {
 	// early bird/after market phase
 	// *todo - do something when the bot has enough action cubes
-	if(phase == 0 || phase == 3) {
-		playerAction(id, 0, -1)
+	if((phase == 0 && players[id].actionCubes >= 3) || (phase == 3 && players[id].actionCubes >= 2)) {
+		playerAction(id, 0, findBestIndex(id, 0));
 	}
 	else if(phase == 2) {
 		if ( $('.goods').eq(activeShop).children().length == 0 ) {
 			playerAction(id, activeShop, -1);
 		}
 		else {
-			var indexBest = 0;
-			var l = shops[activeShop].length;
-			switch(activeShop) {
-				case 0: // restaurant
-					for (i = 0; i < l; i ++)
-						if (shops[0][i] > shops[0][indexBest]) 
-							indexBest = i;
-					break;
-				case 1: case 2: case 3:	// flower shop
-					// don't buy the token if you already have enough
-					if (!needFlowerTokens(id, activeShop-1))
-						indexBest = -1;
-					else {
-						for (i = 0; i < l; i ++) {
-							var best = shops[activeShop][indexBest].quality;
-							var current = shops[activeShop][i].quality
-							if (current > best)
-								indexBest = i;
-						}
-					}
-					break;
-				case 4: // library
-					for (i = 0; i < l; i ++) {
-						var best = shops[4][indexBest].quality;
-						var current = shops[4][i].quality;
-						// here, we want to draw the (subjectively) easiest card to arrange 
-						// *todo : add a clever way to draw a card (weigh)
-						if (current < best)
-							indexBest = i;
-					}
-					break;
-				default:
-						break;
-			}
-			// *todo - use different strategy for each type of bots 
-			// e.g. switching if statement ordering
-			if (activeShop == 5) {
-				// get ahead on tie break track if you're last two
-				if (tieBreak.indexOf(Number(id)) >= numPlayers - 2)
-					indexBest = 4;
-				// then try to get a clock upgrade
-				else if (players[id].time <= 2 && players[id].money >= 6)
-					indexBest = 0;
-				// then try to get more vases
-				else if ((players[id].numVases <= 4 || players[id].numVases == players[id].vases.length)
-						&& players[id].money >= 3)
-					indexBest = 1;
-				// then see if you want some ribbons
-				else if (players[id].numRibbons <= 2 && players[id].money >= shops[5][2].cost + 1)
-					indexBest = 2;
-				// *todo - determine if bot wants extra flower
-				// if all fails, just pass.....
-				else
-					indexBest = 4;
-			}
-			if(!playerAction(id, activeShop, indexBest))
+			if(!playerAction(id, activeShop, findBestIndex(id, activeShop)))
 				playerAction(id, activeShop, -1);
 		}
 	}
@@ -117,7 +62,7 @@ function botChooseTimeTokens(id) {
 	
 	if (turn <= 3)
 		wanted.unshift(5);
-	if (players[id].hand.length >= 2 || shops[4].length == 0)
+	if (players[id].hand.length >= 3 || shops[4].length == 0)
 		unwanted.push(4);
 	else if (players[id].hand.length <= 1)
 		wanted.unshift(4);
@@ -150,7 +95,6 @@ function botChooseTimeTokens(id) {
 		if(!wanted.includes(i) && !unwanted.includes(i))
 			middle.push(i);
 	shuffle(middle);
-	shuffle(wanted);
 	shuffle(unwanted);
 	wanted = wanted.concat(middle, unwanted);
 	var botTT = players[id].getMyTimeTokens();
@@ -179,4 +123,62 @@ function needFlowerTokens (id, i) {
 	}
 	else
 		return true; // want anyting if you have no card
+}
+
+function findBestIndex(id, shop) {
+	var indexBest = 0;
+	var l = shops[shop].length;
+	if (l == 0)
+		return -1;
+
+	switch(shop) {
+		case 0: // restaurant
+			for (i = 0; i < l; i ++)
+				if (shops[0][i] > shops[0][indexBest]) 
+					indexBest = i;
+			break;
+		case 1: case 2: case 3:	// flower shop
+			// don't buy the token if you already have enough
+			if (!needFlowerTokens(id, shop-1))
+				indexBest = -1;
+			else {
+				for (i = 0; i < l; i ++) {
+					var best = shops[shop][indexBest].quality;
+					var current = shops[shop][i].quality;
+					if (current > best)
+						indexBest = i;
+				}
+			}
+			break;
+		case 4: // library
+			for (i = 0; i < l; i ++) {
+				var best = shops[4][indexBest].quality;
+				var current = shops[4][i].quality;
+				// here, we want to draw the (subjectively) easiest card to arrange 
+				// *todo : add a clever way to draw a card (weigh)
+				if (current < best)
+					indexBest = i;
+			}
+			break;
+		case 5: // tool
+			// get ahead on tie break track if you're last two
+			if (tieBreak.indexOf(Number(id)) >= numPlayers - 2)
+				indexBest = 4;
+			// then try to get a clock upgrade
+			else if (players[id].time <= 2 && players[id].money >= 5)
+				indexBest = 0;
+			// then try to get more vases
+			else if ((players[id].numVases <= 4 || players[id].numVases == players[id].vases.length)
+					&& players[id].money >= 4)
+				indexBest = 1;
+			// then see if you want some ribbons
+			else if (players[id].numRibbons <= 2 && players[id].money >= shops[5][2].cost + 1)
+				indexBest = 2;
+			// *todo - determine if bot wants extra flower
+			// if all fails, get some ribbons
+			else
+				indexBest = 2;
+			break;
+	}
+	return indexBest;
 }
