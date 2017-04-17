@@ -405,12 +405,16 @@ table {
 }
 
 .time_token_drop {
-	width: 30px;
-	height: 30px;
-	padding: 5px;
+	width: 25px;
+	height: 25px;
+	padding: 1px;
 	border: 2px black dotted;
 	border-radius: 5px;
 	margin: auto;
+}
+
+.time_token_drop--highlight {
+	border-color: yellow;
 }
 
 .submit_button {
