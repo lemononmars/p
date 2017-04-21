@@ -21,10 +21,6 @@ var activeGames = {};
 var gameRoomId = 0; // use hashtable instead of increment ?
 var userId = 0;
 
-// variables for game
-var playerColors = ["aquamarine", "bisque", "coral", "darkseagreen", "peru", "lightcyan"];
-
-
 io.on('connection', function(socket){
   var addedUser = false;
 
@@ -67,6 +63,7 @@ io.on('connection', function(socket){
   // disconnect a user
   socket.on('disconnect', function(){
     if (addedUser) {
+      console.log(socket.username, ' disconnnected');
       delete onlineUsers[socket.username];
       addedUser = false;
       io.emit('update user list', {
@@ -142,9 +139,7 @@ io.on('connection', function(socket){
     var numPlayers = Object.keys(gameRooms[socket.room]).length;
     // check if the number of players is valid (2-6)
     if (numPlayers + numBots > 1 && numPlayers + numBots < 7) {
-      console.log('game #', socket.room, ' starts !!!');
-      console.log('number of players:', numPlayers);
-      console.log('number of bots:', numBots);
+
       var plist = []; // list of players
       for (const player in gameRooms[socket.room])
         plist.push(player);

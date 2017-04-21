@@ -1,5 +1,5 @@
 body {
-	background-color: lightblue;
+	background-color: #d3e5e5;
 }
 
 h1 {
@@ -311,6 +311,10 @@ table {
 	margin: auto;
 }
 
+#my_bonus1, #my_bonus2, #my_bonus3 {
+	text-align: center;
+}
+
 #button_area {
 	position: absolute;
 	top: 0;
@@ -379,10 +383,17 @@ table {
 }
 
 .time_track_image {
-	width: 65%;
+	width: 85%;
 	height: 20%;
 	margin: auto;
 	border: 1px black solid;
+}
+
+#my_number_played_cards {
+	width: 25%;
+	height: 20%;
+	border: 1px black solid;
+	margin: auto;
 }
 
 .player_hand {
@@ -405,8 +416,8 @@ table {
 }
 
 .time_token_drop {
-	width: 25px;
-	height: 25px;
+	width: 30px;
+	height: 30px;
 	padding: 1px;
 	border: 2px black dotted;
 	border-radius: 5px;
@@ -463,12 +474,33 @@ table {
 	height: 40px;
 }
 
+.money1{
+	background-color: #8C7853;
+}
+
+.money2 {
+	background-color: silver;
+}
+
+.money3{
+	background-color: gold;
+}
+
 .money, .flower1, .flower2, .flower3, .tool {
 	display: inline-block;
 	border: 1px black solid;
 	margin: 2px;
 	width: 40px;
 	height: 40px;
+}
+
+.money:hover, .flower1:hover, .flower2:hover, .flower3:hover, .flower_card:hover, .tool:hover{
+	opacity: 0.5;
+}
+
+.money {
+	color: black;
+	border-radius: 50%;
 }
 
 .tool--large {
@@ -488,16 +520,6 @@ table {
 	width: 10px;
 	height: 10px;
 	margin: 1px;
-}
-
-.money:hover, .flower1:hover, .flower2:hover, .flower3:hover, .flower_card:hover, .tool:hover{
-	opacity: 0.5;
-}
-
-.money {
-	background-color: yellow;
-	color: black;
-	border-radius: 50%;
 }
 
 .time_token {
