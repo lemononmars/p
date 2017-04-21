@@ -16,6 +16,7 @@ function boardSetup() {
 		);
 
 	clearBoard();
+	$('#game_info').show();
 	// add tie break track
 	$('#tie_break_track').append(
 		$('<span/>').text('Tie Break:')
@@ -51,10 +52,6 @@ function boardSetup() {
 					.addClass('player_board')
 					.css('background-color', playerColors[i])
 					.val(i);
-			var $name = $('<span/>').addClass('player_name').text(players[i].username);
-			var $money = $('<span/>').addClass('player_money').text(players[i].money);
-			var $score = $('<span/>').addClass('player_score').text(players[i].score);
-			var $playedCards = $('<span/>').addClass('player_number_played_cards').text(0);
 			var $vase = $('<div/>').addClass('player_vase').addClass('player_vase--opponent');
 
 			for (j = 0; j < 3; j ++)
@@ -63,24 +60,79 @@ function boardSetup() {
 						.addClass('icon--small empty_vase')
 				);
 
-			$($board).append($name, 
+			var $upperBoard = $('<div/>').append(
+				// name 
+				$('<span/>').text(players[i].username)
+					.addClass('player_name'), 
+				// money
 				$('<img/>').attr('src','img/money_icon.png')
 					.addClass('icon--small'),
-				$money,
+				$('<span/>').text(players[i].money)
+					.addClass('player_money'),
+				// score
 				$('<img/>').attr('src','img/score_icon.png')
-						.addClass('icon--small'),
-				$score,
-				$('<img/>').attr('src','img/played_cards_icon.png')
-						.addClass('icon--small'),
-				$playedCards,
+					.addClass('icon--small'),
+				$('<span/>').text(players[i].score)
+					.addClass('player_score'),
+				// time
+				$('<img/>').attr('src','img/time_icon.png')
+					.addClass('icon--small'),
+				$('<span/>').text(players[i].time)
+					.addClass('player_time'),
 				$('<br>'),
 				$vase
 			);
+
+			var $lowerBoard = $('<div/>').append(
+				// ribbons
+				$('<img/>').attr('src','img/ribbon_icon.png')
+					.addClass('icon--small'),
+				$('<span/>').text(players[i].numRibbons)
+					.addClass('player_ribbon'),
+				// action cubes
+				$('<img/>').attr('src','img/action_cube_icon.png')
+					.addClass('icon--small'),
+				$('<span/>').text(players[i].actionCubes)
+					.addClass('player_action_cube'),
+				// number of played cards
+				$('<img/>').attr('src','img/played_cards_icon.png')
+						.addClass('icon--small'),
+				$('<span/>').text(0)
+					.addClass('player_number_played_cards'),
+				
+				$('<br>')
+			);
+
+			for (j = 1; j < 4; j ++) {
+				var starColor = players[i].bonus[j-1] + 1;
+				$lowerBoard.append(
+					$('<img/>').attr('src', 'img/bonus_icon' + j + '.png')
+						.addClass('icon--small')
+						.css('background-color', shopColors[starColor]),
+					$('<span/>').text(0)
+						.addClass('bonus_star')
+				);
+			}
+
+			$($board).append(
+				$upperBoard,
+				$lowerBoard
+			);
+			$($lowerBoard).css({
+					'background-color': playerColors[i],
+					'z-index': 0
+				})
+				.addClass('lower_opponent_board')
+				.hide();
 
 			$('#opponent_board_area').append($board);
 			players[i].addBoard($board);
 		}
 
+		$('#opponent_board_area').append(
+			$('<button/>').text('More')
+				.addClass('button button--expand_opponent_board')
+		);
 	// add info to your board at the bottom of the screen
 	$('#my_board').css('background-color', playerColors[myID])
 		.val(myID);
@@ -104,20 +156,20 @@ function boardSetup() {
 	
 	for (i = 1; i < 4; i ++) {
 		var starColor = players[myID].bonus[i-1] + 1;
-		$('#bonus_icon' + i).append(
-			$('<img/>').attr('src', 'img/bonus_icon' + i + '.png')
-				.addClass('icon')
-				.css('background-color', shopColors[starColor])
-				.attr('title', bonusTypeString[i-1])
-		);
+		$('#bonus_icon' + i).css('background-color', shopColors[starColor])
+			.append(
+				$('<img/>').attr('src', 'img/bonus_icon' + i + '.png')
+					.addClass('icon')
+					.attr('title', bonusTypeString[i-1])
+			);
 		
-		$('#my_bonus' + i).append(
-			$('<span/>').text(0)
-				.addClass('bonus_star')
-				.css('background-color', shopColors[starColor]),
-			$('<img/>').attr('src', 'img/star_icon' + starColor + '.png')
-				.addClass('icon--small')
-		);
+		$('#my_bonus' + i).css('background-color', shopColors[starColor])
+			.append(
+				$('<span/>').text(0)
+					.addClass('bonus_star'),
+				$('<img/>').attr('src', 'img/star_icon' + starColor + '.png')
+					.addClass('icon--small')
+			);
 
 		$('#my_vase').append(
 			$('<img/>').attr('src', 'img/empty_vase.png')
@@ -147,6 +199,42 @@ function boardSetup() {
 			);
 		}
 	}
+
+	 // add as many achievements as the number of players
+	$('#achievement_area').empty();
+	$('#achievement_area--large').empty();
+	$('#achievement_area').append(
+		$('<span/>').text('Achievements')
+	).append(
+		$('<br>')
+	);
+
+	$('#achievement_area').append(
+		$('<button/>').text('Expand')
+			.addClass('button button--expand_achievement')
+			.css({'position':'absolute','top':'0'})
+	);
+
+	for (i = 0; i < achievements.length; i ++) {
+		var type = achievements[i].type;
+		var $accard = 
+		$('#achievement_area').append(
+			$('<img/>').attr('src','img/achievement' + type + '.png')
+				.addClass('achievement_card')
+				.val(type)
+		);
+
+		$('#achievement_area--large').append(
+			$('<img/>').attr('src','img/achievement' + type + '.png')
+				.addClass('achievement_card--large')
+				.val(type)
+		);
+	}
+
+	$('#achievement_area--large').append(
+		$('<button/>').text('Close')
+			.addClass('button button--expand_achievement')
+	);
 
 	// initialize board component
 	players[myID].addBoard(
@@ -224,7 +312,6 @@ function newMarket(goods) {
 					.addClass('flower_token')
 					.val(i)
 					.fadeIn("slow");
-			// dummy components to store data
 			$(ftoken).data({
 				type: j,
 				quality: goods[j][i][1]
@@ -246,7 +333,10 @@ function newMarket(goods) {
 
 		var $card = $('<div/>')
 						.addClass('flower_card')
-						.val(i);
+						.val(i)
+						.data({
+							info: a
+						});
 
 		// add flower icons
 		for(j = 1; j < 4; j ++)
@@ -300,6 +390,7 @@ function newMarket(goods) {
 		);
 	}
 	$('#goods6').append(
+		$('<br>'),
 		$('<button/>').text('See All')
 			.addClass('button--expand_tool')
 	);

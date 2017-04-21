@@ -244,6 +244,15 @@ table {
 	border-radius: 5px;
 }
 
+.lower_opponent_board {
+	display: inline-block;
+	width: 80px;
+	height: 50px;
+	margin: 5px;
+	border: 2px black solid;
+	border-radius: 5px;
+}
+
 .player_name, .player_money {
 	display: inline-block;
 	margin: 3px;
@@ -297,7 +306,7 @@ table {
 
 #my_left_board {
 	display: inline-block;
-	width: 125px;
+	width: 110px;
 	height: 175px;
 	border: 2px black solid;
 	margin: auto;
@@ -305,7 +314,7 @@ table {
 
 #my_right_board{
 	display: inline-block;
-	width: 290px;
+	width: 305px;
 	height: 175px;
 	border: 2px black solid;
 	margin: auto;
@@ -428,7 +437,7 @@ table {
 	border-color: yellow;
 }
 
-.submit_button {
+.button--submit {
 	border-style: none;
 	width: 80px;
 	height: 40px;
@@ -438,7 +447,7 @@ table {
 	color: white;
 }
 
-.pass_button {
+.button--pass {
 	border-style: none;
 	width: 80px;
 	height: 40px;
@@ -494,7 +503,7 @@ table {
 	height: 40px;
 }
 
-.money:hover, .flower1:hover, .flower2:hover, .flower3:hover, .flower_card:hover, .tool:hover{
+.money:hover, .flower1:hover, .flower2:hover, .flower3:hover, .flower_card:hover, .tool:hover, .button:hover, .time_token:hover{
 	opacity: 0.5;
 }
 
@@ -517,9 +526,8 @@ table {
 }
 
 .card_icon {
-	width: 10px;
-	height: 10px;
-	margin: 1px;
+	width: 15px;
+	height: 15px;
 }
 
 .time_token {
@@ -554,7 +562,6 @@ table {
 	height: 15px;
 	background-color: white;
 	color: black;
-	margin: 1px;
 }
 
 .score_symbol {
@@ -564,7 +571,6 @@ table {
 	border-radius: 50%;
 	background-color: black;
 	color: white;
-	margin: 1px;
 }
 
 .achievement_card {
@@ -597,7 +603,7 @@ table {
 	background-color: brown;
 }
 
-.button--expand_tool{
+.button--expand_tool, .button--expand_opponent_board{
 	border: none;
 	position: absolute;
 	width: 60px;
@@ -607,13 +613,22 @@ table {
 	margin: 2px;
 }
 
-.button--expand_achievement:hover, .button--expand_tool:hover{
-	opacity: 0.7;
-}
-
-
 @keyframes blink { 
    50% { opacity : 0.5; } 
+}
+
+.loader {
+    border: 16px solid #f3f3f3;
+    border-top: 16px solid #3498db;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .active {

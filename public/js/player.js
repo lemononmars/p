@@ -172,15 +172,17 @@ function player(id, username, color, bot) {
 		var s = this.getBonus(2) + this.hand[cardIndex].score; // score = card score + score bonus
 		this.score += s;
 		this.money += this.getBonus(1);
-		for (i = 0; i < 3; i ++)
-			this.stars[i] += this.hand[cardIndex].getFlowersAt(i);
 		this.numPlayedCards += 1;
 		$(this.myBoard).find('.player_number_played_cards').text(this.numPlayedCards);
 		
 		// add log
 		addLog(this.username + " arranges a bouquet ~", this.id);
-		addLog("...." + this.username + " gains ฿" + this.stars[this.bonus[1]], this.id);
-		addLog("...." + this.username + " gets " + s + " points", this.id);
+		addLog("...." + this.username + " gains ฿" + this.getBonus(1), this.id);
+		addLog("...." + this.username + " gets " + this.hand[cardIndex].score + "+" + this.getBonus(2) + " points", this.id);
+
+		// add bonus stars
+		for (i = 0; i < 3; i ++)
+			this.stars[i] += this.hand[cardIndex].getFlowersAt(i);
 
 		// spend resources
 		this.numRibbons -= ribbonsUsed;
@@ -206,11 +208,9 @@ function player(id, username, color, bot) {
 	this.update = function () {
 		$(this.myBoard).find('.player_money').text(this.money);
 		$(this.myBoard).find('.player_score').text(this.score);
-		if (this.id == myID) {
-			$(this.myBoard).find('.player_ribbon').text(this.numRibbons);
-			$(this.myBoard).find('.player_action_cube').text(this.actionCubes);
-			for (i = 0; i < 3; i ++)
-				$(this.myBoard).find('.bonus_star').eq(i).text(this.stars[this.bonus[i]]);
-		}
+		$(this.myBoard).find('.player_ribbon').text(this.numRibbons);
+		$(this.myBoard).find('.player_action_cube').text(this.actionCubes);
+		for (i = 0; i < 3; i ++)
+			$(this.myBoard).find('.bonus_star').eq(i).text(this.stars[this.bonus[i]]);
 	};
 }

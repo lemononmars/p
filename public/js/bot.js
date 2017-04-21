@@ -177,7 +177,7 @@ function findBestIndex(id, shop) {
 			// *todo - determine if bot wants extra flower
 			// if all fails, get some ribbons
 			else
-				indexBest = 2;
+				indexBest = -1;
 			break;
 	}
 	return indexBest;

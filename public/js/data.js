@@ -13,7 +13,7 @@ var botNames = ['Mel', 'Game', 'Job', 'Lui', 'Poupe', 'Due', 'Au', 'Som', 'Benz'
 var playerColors = ['aquamarine', 'bisque', 'coral', 'darkseagreen', 'peru', 'lightcyan'];
 var shopList = ['Restaurant', 'Rose', 'Orchid', 'Mums', 'Bookstore', 'Tool'];
 var shopColors = ['yellow', 'pink', 'skyblue', 'white', 'purple', 'lightgreen'];
-var timeTokenList = [0, 1, 2, 3, 4, 'x', 'xx'];
+var timeTokenList = [0, 1, 2, 3, 4, 'x', 'x'];
 var bonusTypeString = ['Quality bonus', 'Money bonus', 'Score bonus'];
 var cardLevelStars = ['*', '**', '***'];
 
@@ -43,24 +43,19 @@ var achievementString = [	'6 pink', '6 blue', '6 white',
 							'5 finished cards'];
 
 // [pink, blue, white, score, money]
-var achievementRewards = [	[0,0,0,3,0], [0,0,0,3,0], [0,0,0,3,0],
-							[0,0,0,2,2], [0,0,0,2,2], [0,0,0,2,2],
-							[1,1,1,0,2],
-							[0,0,0,3,0]];
-
-var achievementRewardString = [ 	'blue + white + 2 VP', 'pink + white + 2 VP', 'blue + pink + 2 VP',
-						'2 white + 1 VP + $2', '2 blue + 1 VP + $2', '2 pink + 1 VP + $2',
-						' 1 white & blue & pink + $2',
-						'1 white & blue & pink + 2 VP'];
+var achievementRewards = [	[0,0,0,5,0], [0,0,0,5,0], [0,0,0,5,0],
+							[0,0,0,3,3], [0,0,0,3,3], [0,0,0,3,3],
+							[1,1,1,0,5],
+							[0,0,0,5,0]];
 
 function generateStartingFlowerCards () {
 	var startingFlowerCards = [];
-	startingFlowerCards.push([0, 1, 1, 3, 1]);
-	startingFlowerCards.push([0, 1, 1, 3, 1]);
-	startingFlowerCards.push([1, 0, 1, 3, 1]);
-	startingFlowerCards.push([1, 0, 1, 3, 1]);
-	startingFlowerCards.push([1, 1, 0, 3, 1]);
-	startingFlowerCards.push([1, 1, 0, 3, 1]);
+	startingFlowerCards.push([0, 1, 1, 3, 1, 0]);
+	startingFlowerCards.push([0, 1, 1, 3, 1, 0]);
+	startingFlowerCards.push([1, 0, 1, 3, 1, 0]);
+	startingFlowerCards.push([1, 0, 1, 3, 1, 0]);
+	startingFlowerCards.push([1, 1, 0, 3, 1, 0]);
+	startingFlowerCards.push([1, 1, 0, 3, 1, 0]);
 	shuffle(startingFlowerCards);
 	return startingFlowerCards;
 }

@@ -68,7 +68,11 @@ $(document).ready(function(){
     // add a newly logged in user
 
     socket.on('username checked', function(data) {
-        if (!data.dupe) {
+        if (data.dupe)
+            alert('This username has been used already.')
+        else if (myusername.length > 8)
+            alert('Your username is too long (max=8).')
+        else {
             $('#login_page').hide();
             $('#menu_bar').show();
             $('#gamelist_lobby').show();
@@ -81,9 +85,6 @@ $(document).ready(function(){
             socket.emit('add user', {
                 username: myusername
             });
-        }
-        else {
-            alert('This username has been used already.');
         }
     });
 
@@ -162,8 +163,8 @@ $(document).ready(function(){
     // add a user to a room
     socket.on('update room', function(data) {
         var list = $('.game_room').
-        filter(function(){return this.value == data.roomId;})
-        .children("ul");
+            filter(function(){return this.value == data.roomId;})
+            .children("ul");
         
         list.empty();
         for (name in data.list)
@@ -179,6 +180,16 @@ $(document).ready(function(){
             else{
                 $('#create_room').prop('disabled', true);
                 myroom = data.roomId;
+            }
+        }
+
+        if (Object.keys(data.list).length == 0) {
+            $('.game_room')
+                .filter(function(){return this.value == data.roomId;})
+                .remove();
+            if (data.roomId == myroom) {
+                myroom = -1;
+                $('#create_room').prop('disabled', false);
             }
         }
     });

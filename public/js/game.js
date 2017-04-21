@@ -237,14 +237,34 @@ function nextPlayer () {
 		while (index < numPlayers && players[tieBreak[index]].actionCubes < cubesNeeded) {
 			index++;
 		}
-		if (index < numPlayers)
+		if (index < numPlayers) {
 			nextP = tieBreak[index];
+			if (nextP == myID) {
+				$('.shop').addClass('active');
+				$('.button--pass').prop('disabled', false);
+			}
+			else {
+				$('.shop').removeClass('active');
+				$('.button--pass').prop('disabled', true);
+			}
+		}
 		else if(myID == 0) {
 			socket.emit('end phase', {
 				phase : phase	
 			});
 			nextP = -1;
 		}
+	}
+
+	// undo fancy blinking and remove pass button once your turn is over
+	if (currentPlayer == myID) {
+		$('#status_bar').removeClass('active');
+		clearInterval(blink);
+		titleBlink = false;
+		$('link[rel="icon"]').attr('href', 'img/title_icon.png');
+		document.title = 'Pakklong Talat';
+		if (phase == 0 || phase == 2 || phase == 3)
+			$('.button--pass').remove();
 	}
 
 	currentPlayer = nextP;
@@ -255,6 +275,7 @@ function nextPlayer () {
 	
 	if (nextP == myID) {
 		// make the title blink to remind the player's turn
+		addNoti('Your Turn !');
 		$('#status_bar').addClass('active');
 		blink = setInterval(function() {
 			document.title = (titleBlink) ? '!! Your Turn !!' : 'Pakklong Talat';
@@ -263,22 +284,11 @@ function nextPlayer () {
 			titleBlink = !titleBlink;
 		}, 700);
 		// add the pass button
-		if (phase == 0 || phase == 3)
+		if (phase == 0 || phase == 2 || phase == 3)
 			$('#button_area').append(
-				$('<button/>').addClass('pass_button')
+				$('<button/>').addClass('button button--pass')
 					.text('Pass')
 		);
-	}
-	else {
-		// undo the fancy blinking
-		$('#status_bar').removeClass('active');
-		clearInterval(blink);
-		titleBlink = false;
-		$('link[rel="icon"]').attr('href', 'img/title_icon.png');
-		document.title = 'Pakklong Talat';
-		// remove the pass button
-		if (phase == 0 || phase == 3)
-			$('.pass_button').remove();
 	}
 }
 
@@ -313,6 +323,7 @@ function checkEndGame() {
 		if (maxStars >= starThreshold) {
 			end = true;
 			players[p].score += 2;	// extra points for reaching the threshold
+			players[p].update();
 		}
 		if (players[p].score > maxScore)
 			maxScore = players[p].score;

@@ -63,12 +63,23 @@ io.on('connection', function(socket){
   // disconnect a user
   socket.on('disconnect', function(){
     if (addedUser) {
-      console.log(socket.username, ' disconnnected');
       delete onlineUsers[socket.username];
       addedUser = false;
       io.emit('update user list', {
         list : onlineUsers
       });
+      // remove the user from the room she/he was in
+      if (socket.room > -1) {
+        socket.leave(socket.room);
+        delete gameRooms[socket.room][socket.username];
+        if (Object.keys(gameRooms[socket.room]).length == 0)
+          delete gameRooms[socket.room];
+        io.emit('update room', {
+          list : gameRooms[socket.room],
+          username : socket.username,
+          roomId : socket.room
+        });
+      }
     }
   });
 

@@ -135,7 +135,10 @@ function achievementCard (type) {
 			var t = this.type;
 			$('.achievement_card').filter( 
 				function() { return $(this).val() == t}
-			).css('border-color',players[id].color);
+			).css({
+				'background-color': players[id].color,
+				'opacity': 0.5
+			});
 
 			$('.achievement_card--large').filter( 
 				function() { return $(this).val() == t}

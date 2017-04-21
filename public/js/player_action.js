@@ -122,9 +122,9 @@ function takeAction(id, location, index) {
 			break;
 	}
 	// it costs extra action cubes if you take action during these phases
-	if (phase == 0 && location < 6)
+	if (phase == 0 && location < 6 && !buyFlowerToolToken)
 		players[id].actionCubes -= 3;
-	if (phase == 3 && location < 6)
+	if (phase == 3 && location < 6 && !buyFlowerToolToken)
 		players[id].actionCubes -= 2;
 
 	// update displayed information
