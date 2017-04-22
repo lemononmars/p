@@ -7,13 +7,6 @@
 
 
 function boardSetup() {
-	shops = [[],[],[],[],[],[]];
-
-	// add 5 different tools
-	for (i = 0; i < 5; i ++)
-		shops[5].push(
-			new toolToken(i)
-		);
 
 	clearBoard();
 	$('#game_info').show();
@@ -177,8 +170,13 @@ function boardSetup() {
 		);
 	}
 
-	// add popup area that shows all tools with all levels
-	
+	// add tool tokens and popup area that shows all tools with all levels
+	shops = [[],[],[],[],[],[]];
+	for (i = 0; i < 6; i ++)
+		shops[5].push(
+			new toolToken(i)
+		);
+		
 	$('#tool_lookup').append(
 		$('<button/>').text('Close')
 			.addClass('button--expand_tool')
@@ -190,7 +188,7 @@ function boardSetup() {
 			$('<span/>').text('level ' + i).css('color', 'white')
 		);
 		$('#tool_lookup').append($('<br>'));
-		for (j = 0; j < 5; j ++) {
+		for (j = 0; j < 6; j ++) {
 			$('#tool_lookup').append(
 				$("<img/>")
 					.attr('src', 'img/tool' + j + 'lv' + i + '.jpg' )
@@ -388,9 +386,10 @@ function newMarket(goods) {
 				.addClass('tool')
 				.val(i)
 		);
+		if ((i % 3) == 2)
+			$('#goods6').append($('<br>'));
 	}
 	$('#goods6').append(
-		$('<br>'),
 		$('<button/>').text('See All')
 			.addClass('button--expand_tool')
 	);

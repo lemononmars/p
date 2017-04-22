@@ -321,6 +321,7 @@ $(document).ready(function(){
         switch(data.phase) {
             // from early-bird to planning phase
             case 0: 
+                $('.shop').removeClass('active');
                 // add droppable areas
                 $('.time_token_area').each(function() {
                     $(this).append(
@@ -449,12 +450,14 @@ $(document).ready(function(){
                         .text('End Phase')
                 );
 
+                $('.shop').removeClass('active');
+
                 var $addRibbons = $('<select/>').addClass('add_ribbons');
 
                 for (i = 0; i <= players[myID].numRibbons; i ++) {
                     var suffix = (i >= 1) ? ' ribbons' : ' ribbon';
                     $addRibbons.append(
-                        $('<option/>').val(i).text(i + suffix)
+                        $('<option/>').val(i).text(i + suffix + ' (+' + Number(2*i) + ')')
                     );
                 }  
 

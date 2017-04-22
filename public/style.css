@@ -237,7 +237,7 @@ table {
 .player_board {
 	display: inline-block;
 	margin: 5px;
-	width: 150px;
+	width: 160px;
 	height: 50px;
 	padding: 3px;
 	border: 2px black solid;
@@ -246,9 +246,10 @@ table {
 
 .lower_opponent_board {
 	display: inline-block;
-	width: 80px;
+	width: 100px;
 	height: 50px;
 	margin: 5px;
+	padding: auto;
 	border: 2px black solid;
 	border-radius: 5px;
 }
@@ -268,12 +269,12 @@ table {
 }
 
 #tool_lookup {
-	width: 320px;
+	width: 400px;
 	height: 280px;
 	z-index: 1;
 	position: fixed;
 	top: 200px;
-	right: -400px;
+	right: -420px;
 	transition: 0.3s;
 	background-color: black;
 	padding: 5px;

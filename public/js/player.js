@@ -137,14 +137,16 @@ function player(id, username, color, bot) {
 					addLog(">> You may buy any leftover flower");
 				else
 					addLog(">> สามารถซื้อดอกไม้ในร้านใดก็ได้")
+				$('.shop').removeClass('active');
 				$('#shop2').addClass('active');
 				$('#shop3').addClass('active');
 				$('#shop4').addClass('active');
-				$('#shop6').removeClass('active')
 				break;	
 			case 4: 
 				goFirst(this.id); 
 				break;
+			case 5:
+				this.actionCubes += toolToken.getAmount();
 		 }
 		 this.update();
 	};
@@ -210,6 +212,7 @@ function player(id, username, color, bot) {
 		$(this.myBoard).find('.player_score').text(this.score);
 		$(this.myBoard).find('.player_ribbon').text(this.numRibbons);
 		$(this.myBoard).find('.player_action_cube').text(this.actionCubes);
+		$(this.myBoard).find('.player_time').text(this.time);
 		for (i = 0; i < 3; i ++)
 			$(this.myBoard).find('.bonus_star').eq(i).text(this.stars[this.bonus[i]]);
 	};

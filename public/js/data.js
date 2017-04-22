@@ -17,23 +17,26 @@ var timeTokenList = [0, 1, 2, 3, 4, 'x', 'x'];
 var bonusTypeString = ['Quality bonus', 'Money bonus', 'Score bonus'];
 var cardLevelStars = ['*', '**', '***'];
 
-var toolCost = [[3,5,4], 
+var toolCost = [[3,2,4], 
 				[3,2,4], 
 				[1,2,1], 
 				[2,1,0], 
-				[1,0,0]];
+				[1,0,0],
+				[1,1,1]];
 
-var toolAmount = [	[1, 2, 2], 
-					[1, 1, 2], 
-					[1, 2, 2], 
-					[1, 1, 1],
-					[1, 1, 1]];
+var toolAmount = [	[1,1,2], 
+					[1,1,2], 
+					[1,2,2], 
+					[1,1,1],
+					[1,1,1],
+					[2,3,4]];
 
 var toolString = [	['a clock', 'two clocks', 'two clocks'], 
 					['a vase', 'a vase', 'two vases'], 
 					['a ribbon', 'two ribbons', 'two ribbons'], 
 					['a flower', 'a flower', 'a flower'],
-					['First in Tie Break', 'First in Tie Break', 'First in Tie Break']];
+					['First in Tie Break', 'First in Tie Break', 'First in Tie Break'],
+					['two action cubes', 'three action cubes', 'four action cubes']];
 
 var achievementSymbol = [0,1,2,3,4,5,6,7];
 
@@ -84,13 +87,13 @@ function getRandomFlowerCard() {
 	return [a[0], a[1], a[2], qual, score, l]; // score = 2*(total-1) + 2*level
 }
 
-// return array of length 5 where a[i] = # tools drawn for tool of type i
+// return array of length 6 where a[i] = # tools drawn for tool of type i
 	// 0: clock
     // 1: vase
     // 2: ribbon
     // 3: buy flower
     // 4: tie break
-	// 5: nothing (blank)
+	// 5: action cubes
 function getTools(num) {
 	var tools = [0,0,0,0,0,0];
 	for (j = 0; j < num; j ++)
