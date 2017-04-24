@@ -127,9 +127,10 @@ $(document).ready(function(){
             socket.emit('leave game');
         } else if (phase == 1) {
             // check if all slots are occupied
-            if ($('.time_token_drop div').length == 6) {
+            if ($('.time_token_drop div').length == 4) {
                 for (i = 0; i < 6; i ++) {
-                    players[myID].myPlayedTimeTokens[i] = $('.time_token').eq(i).val();
+                    players[myID].myPlayedTimeTokens[i] = ($('.time_token_drop').eq(i).find('.time_token').length == 0) ?
+                        5 : $('.time_token_drop').eq(i).find('.time_token').eq(0).val();
                 }
                 isDone = true;
                 socket.emit('submit time tokens', {
@@ -356,7 +357,7 @@ $(document).ready(function(){
                 $myTimeTokenButtons = [];
                 var mtt = players[myID].getMyTimeTokens();
                 // display time tokens to choose in planning phase
-                for (i = 0; i < 6; i ++) {
+                for (i = 0; i < 4; i ++) {
                     $('#button_area').append(
                         $('<div/>').addClass('time_token')
                             .css('background-color', players[myID].color)

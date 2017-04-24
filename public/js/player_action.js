@@ -43,6 +43,9 @@ function takeAction(id, location, index) {
 		return true;
 	}
 
+	if (buyFlowerToolToken && (location == 0 || location >= 4))
+		return false;
+
 	switch(location) {
 		case 0:
 			players[id].money += shops[0][index];
