@@ -86,10 +86,10 @@ function botChooseTimeTokens(id) {
 			wanted.unshift(3);
 	}
 		
-	var totalMoney = 0, l = $('#goods1').children().length;
+	var totalMoney = 0, l = shops[0].length;
 	for (i = 0; i < l; i ++)
-		totalMoney += Number($('#goods1').children().eq(i).val());
-	if (players[id].money <= 3 || (totalMoney / numPlayers) >= 2 )
+		totalMoney += shops[0][i];
+	if (players[id].money <= 3 || totalMoney >= 2*numPlayers )
 		wanted.unshift(0);
 		
 	// random the rest

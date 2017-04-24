@@ -117,8 +117,7 @@ function takeAction(id, location, index) {
 			players[id].money -= shops[5][index].getCost();
 			shops[5][index].levelDown(1);
 			// change the image and title
-			$('#goods6 img')
-				.filter(function() {return $(this).val() == index;})
+			$('#goods6 img').eq(index)
 				.attr('src', 'img/tool' + index + 'lv' + shops[5][index].level + '.jpg' )
 				.attr('title', shops[5][index].toString());
 

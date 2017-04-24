@@ -291,7 +291,6 @@ function newMarket(goods) {
 			.text("฿" + goods[0][i])
 			.addClass('money')
 			.addClass('money' + Number(goods[0][i]))
-			.val(i)
 			.fadeIn("slow")
 		);
 	}
@@ -308,7 +307,6 @@ function newMarket(goods) {
 					.attr('src', 'img/f' + j + 'q' + goods[j][i][1] + '.jpg')
 					.addClass('flower' + j)
 					.addClass('flower_token')
-					.val(i)
 					.fadeIn("slow");
 			$(ftoken).data({
 				type: j,
@@ -331,7 +329,6 @@ function newMarket(goods) {
 
 		var $card = $('<div/>')
 						.addClass('flower_card')
-						.val(i)
 						.data({
 							info: a
 						});
