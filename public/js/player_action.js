@@ -21,6 +21,8 @@ function playerAction(id, location, index) {
 //	A player with ID 'id' attempts to perform the 'action' at the specified 'index'
 //	id			- player ID
 //	location	- which shop the action takes place
+//				  0-5: shops
+//				  6: achievements
 //	index		- which object in the location is being chosen
 ///////////////////////////////////////////////////
 
@@ -50,11 +52,13 @@ function takeAction(id, location, index) {
 		case 0:
 			players[id].money += shops[0][index];
 			addLog(players[id].username + " gains ฿" + shops[0][index], id);
-			// remove the component from the board
-			$('#goods1').children()
-				.eq(index)
-				.remove();
-			shops[0].splice(index, 1);
+			// remove the component from the board only during buy phase
+			if (phase == 2) {
+				$('#goods1').children()
+					.eq(index)
+					.remove();
+				shops[0].splice(index, 1);
+			}
 			break;
 		case 1: case 2: case 3:
 			if (players[id].money < 1 && !buyFlowerToolToken) {
@@ -122,6 +126,14 @@ function takeAction(id, location, index) {
 				.attr('title', shops[5][index].toString());
 
 			break;
+		case 6:
+			// claim an achievement by spending action cubes
+			if (achievements[index].check(id) && !achievements[index].isClaimed(id))
+				players[id].getAchievementRewards(
+					achievements[index].claimAchievement(id)
+				);
+			else
+				return false;
 	}
 	// it costs extra action cubes if you take action during these phases
 	if (phase == 0 && location < 6 && !buyFlowerToolToken)

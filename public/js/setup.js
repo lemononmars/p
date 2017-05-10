@@ -202,12 +202,8 @@ function boardSetup() {
 	$('#achievement_area').empty();
 	$('#achievement_area--large').empty();
 	$('#achievement_area').append(
-		$('<span/>').text('Achievements')
-	).append(
-		$('<br>')
-	);
-
-	$('#achievement_area').append(
+		$('<span/>').text('Achievements'),
+		$('<br>'),
 		$('<button/>').text('Expand')
 			.addClass('button button--expand_achievement')
 			.css({'position':'absolute','top':'0'})
@@ -219,13 +215,20 @@ function boardSetup() {
 		$('#achievement_area').append(
 			$('<img/>').attr('src','img/achievement' + type + '.png')
 				.addClass('achievement_card')
-				.val(type)
+				.data({
+					type: type,
+					index: i
+				}),
+			$('<span/>').addClass('achievement_claimer_token')
 		);
 
 		$('#achievement_area--large').append(
 			$('<img/>').attr('src','img/achievement' + type + '.png')
 				.addClass('achievement_card--large')
-				.val(type)
+				.data({
+					type: type,
+					index: i
+				})
 		);
 	}
 
@@ -254,10 +257,15 @@ function generateGoods(num) {
 			goods[0].push(Math.floor((a+1)/2) + 1); // 1,2,2,3,3,X
 		}
 	}
+	goods[0].sort();
 
 	var flowerTokens = [];
 	for (i = 0; i < num*2; i++) 
 		flowerTokens.push(getRandomFlowerToken());  // [type, qual]
+
+	flowerTokens.sort(function(a,b) {
+		return a[1]-b[1];
+	});
 
 	for (i = 0; i < flowerTokens.length; i ++) {
 		var shopIndex = flowerTokens[i][0] + 1; // shop index = 1,2,3
@@ -265,8 +273,11 @@ function generateGoods(num) {
 	}
 
 	for (i = 0; i < num; i ++) {
-		goods[4].push(getRandomFlowerCard());
+		goods[4].push(getRandomFlowerCard()); // [pink, blue, white, qual, score, level]
 	}
+	goods[4].sort(function(a,b){
+		return a[5] - b[5]
+	});
 
 	goods[5] = getTools(numPlayers);
   	return goods;

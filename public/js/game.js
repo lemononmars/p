@@ -265,6 +265,7 @@ function nextPlayer () {
 		document.title = 'Pakklong Talat';
 		if (phase == 0 || phase == 2 || phase == 3)
 			$('.button--pass').remove();
+		$('.achievement_card').removeClass('active');
 	}
 
 	currentPlayer = nextP;
@@ -288,7 +289,16 @@ function nextPlayer () {
 			$('#button_area').append(
 				$('<button/>').addClass('button button--pass')
 					.text('Pass')
-		);
+			);
+		if (phase == 0 || phase == 3) {
+			for (var ac in achievements) {
+				if(achievements[ac].check(myID)) {
+					var type = achievements[ac].type;
+					$('.achievement_card').filter(function(){return $(this).data('type') == type})
+						.addClass('active')
+				}
+			}
+		}
 	}
 }
 

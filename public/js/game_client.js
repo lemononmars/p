@@ -29,7 +29,6 @@ $(document).ready(function(){
     $(document).on('click', '.button--expand_opponent_board', function() {
         $('#game_info').slideToggle();
         $('.lower_opponent_board').slideToggle();
-
     });
     // testing purpose only !
 
@@ -46,7 +45,7 @@ $(document).ready(function(){
     $(document).on('click', '.random_button', function() {
         var temp = [0,1,2,3,4,5];
         shuffle(temp);
-        for (i = 0; i < 6; i ++) {
+        for (i = 0; i < 4; i ++) {
             $('.time_token_drop').eq(temp[i]).append(
                 $('#button_area').find('.time_token').first()
             );
@@ -117,6 +116,10 @@ $(document).ready(function(){
             playerAction(myID, 5, $(this).val());
     });
 
+    $(document).on('click', '.achievement_card', function() {
+        if (currentPlayer == myID && (phase == 0 || phase == 3))
+            playerAction(myID, 6, $(this).data('index'))
+    })
     $(document).on('click', '.button--submit', function() {
         // return to lobby
         if (gameState == 3) {
@@ -144,7 +147,7 @@ $(document).ready(function(){
                 );
             }
             else
-                alert('add time tokens to all shops!');
+                addNoti('add time tokens to all shops!');
         }
         // check if card's requirements are all satisfied
         else if (phase == 4) {
@@ -193,8 +196,11 @@ $(document).ready(function(){
             isDone = true;
             $('#my_hand').children().removeClass('chosen');
             $('#my_vase').children().removeClass('chosen');
-            addNoti('Done! Wait for other players to finish');
+            addNoti('Wait for other players to finish');
             $('#button_area').empty();
+            $('#button_area').append(
+                $('<div/>').addClass('loader')
+            );
             socket.emit('finish arranging');
         }
     });
@@ -330,6 +336,9 @@ $(document).ready(function(){
                             .addClass('time_token_drop')
                             .droppable({
                                 accept: '.time_token',
+                                classes: {
+                                    'ui-droppable-hover': 'chosen'
+                                },
                                 drop: function(event, ui) {
                                     var value = $(ui.draggable).val();
                                     // swap tokens if the area has one already
@@ -356,6 +365,10 @@ $(document).ready(function(){
 
                 $myTimeTokenButtons = [];
                 var mtt = players[myID].getMyTimeTokens();
+                $('#button_area').append(
+                    $('<button/>').addClass('button button--submit')
+                        .text('Submit')
+                );
                 // display time tokens to choose in planning phase
                 for (i = 0; i < 4; i ++) {
                     $('#button_area').append(
@@ -371,10 +384,6 @@ $(document).ready(function(){
                     );
                 }
 
-                $('#button_area').append(
-                    $('<button/>').addClass('button button--submit')
-                        .text('Submit')
-                );
                 // random button is for testing only !!!!!
                 /*$('#button_area').append(
                     $('<button/>').addClass('random_button')
@@ -490,12 +499,6 @@ $(document).ready(function(){
             // from flower arranging phase to next turn (early bird phase)
             case 4:
                 isDone = false;
-                // see if anyone is eligible for any achievement
-                for (var ac in achievements) {
-                        for (i = 0; i < numPlayers; i ++)
-                            if (achievements[ac].check(tieBreak[i]))
-                                players[tieBreak[i]].getAchievementRewards(achievements[ac].getRewards());
-                }
                 if (checkEndGame()) {
                     gameState = 3;
                     var winner = 0;

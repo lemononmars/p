@@ -92,66 +92,64 @@ function timeToken(id, value) {
 // info of achievement cards
 function achievementCard (type) {
 	this.type = type;
-	this.claimed = false;
-	this.claimer = 0;
+	this.claimers = {};
 
 	this.check = function(id) {
 		var stars = players[id].getStars();
-		// remove this if several players can claim the same achievement
-		if (this.claimed)
-			return false;
-
+			c = false;
 		switch(this.type) {
 			case 0:
-				this.claimed = (stars[0] >= 6);
+				c = (stars[0] >= 6);
 				break;
 			case 1:
-				this.claimed = (stars[1] >= 6);
+				c = (stars[1] >= 6);
 				break;
 			case 2:
-				this.claimed = (stars[2] >= 6);
+				c = (stars[2] >= 6);
 				break;
 			case 3:
-				this.claimed = (stars[0] >= 4 && stars[1] >= 4);
+				c = (stars[0] >= 4 && stars[1] >= 4);
 				break;
 			case 4:
-				this.claimed = (stars[0] >= 4 && stars[2] >= 4);
+				c = (stars[0] >= 4 && stars[2] >= 4);
 				break;
 			case 5:
-				this.claimed = (stars[1] >= 4 && stars[2] >= 4);
+				c = (stars[1] >= 4 && stars[2] >= 4);
 				break;
 			case 6:
-				this.claimed = (stars[0] >= 3 && stars[1] >= 3 && stars[2] >= 3);
+				c = (stars[0] >= 3 && stars[1] >= 3 && stars[2] >= 3);
 				break;
 			case 7:
-				this.claimed = (players[id].numPlayedCards >= 5);
+				c = (players[id].numPlayedCards >= 5);
 				break;
 			default:
 				break;
 		}
-		if (this.claimed) {
-			this.claimer = id;
-			addLog(players[id].username + ' claimed an achievement #' + this.type + ' !', id);
-			var t = this.type;
-			$('.achievement_card').filter( 
-				function() { return $(this).val() == t}
-			).css({
-				'background-color': players[id].color,
-				'opacity': 0.5
-			});
+		return c;
+	};
 
-			$('.achievement_card--large').filter( 
-				function() { return $(this).val() == t}
-			).addClass('achievement_card--claimed');
-		}
-		return this.claimed;
+	this.claimAchievement = function(id) {
+		this.claimers[id] = {};
+		addLog(players[id].username + ' claimed an achievement #' + this.type + ' !', id);
+		var t = this.type;
+		// add a reminder who has claimed this already
+		$('.achievement_card').filter( 
+			function() { return $(this).data('type') == t}
+		).after(
+			$('<div/>').addClass('achievement_token')
+				.css({
+					'background-color': players[id].color,
+					'z-index': 1
+				})
+		)
+		return achievementRewards[this.type];
 	};
 
 	this.toString = function () {
 		return achievementString[this.type];
 	};
 
-	this.getRewards = function() {
-		return achievementRewards[this.type];
-	};
+	this.isClaimed = function(id) {
+		return (id in this.claimers);
+	}
 }

@@ -234,6 +234,11 @@ table {
 	margin-left: 5px;
 }
 
+.main_board_table {
+	table-layout: fixed;
+	width: 100%;
+
+}
 .player_board {
 	display: inline-block;
 	margin: 5px;
@@ -299,7 +304,7 @@ table {
 }
 
 #my_board {
-	width: 430px;
+	width: 450px;
 	height: 180px;
 	padding: 2px;
 	border: 2px black solid;
@@ -307,10 +312,14 @@ table {
 
 #my_left_board {
 	display: inline-block;
-	width: 110px;
+	width: 130px;
 	height: 175px;
 	border: 2px black solid;
 	margin: auto;
+}
+
+#my_left_board_table {
+	width: 100%;
 }
 
 #my_right_board{
@@ -541,6 +550,15 @@ table {
 	border: 1px black solid;
 }
 
+.achievement_token {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	margin: 2px;
+	text-align: center;
+	border: 1px black solid;
+}
+
 .flower_card {
 	display: inline-block;
 	width: 60px;
@@ -619,8 +637,8 @@ table {
 }
 
 .loader {
-    border: 16px solid #f3f3f3;
-    border-top: 16px solid #3498db;
+    border: 10px solid #f3f3f3;
+    border-top: 10px solid #3498db;
     border-radius: 50%;
     width: 30px;
     height: 30px;
@@ -637,7 +655,7 @@ table {
 }
 
 .chosen {
-	opacity: 0.5;
+	border: red dotted;
 }
 
 /*
